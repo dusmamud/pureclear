@@ -17,7 +17,7 @@
     "react-dom": "^19.3.1",
     "tailwindcss": "^4.3.3"
   },
-  "description": "PureClear — 100% in-browser EXIF/metadata remover. Lossless, no uploads.",
+  "description": "PureClear \u2014 100% in-browser EXIF/metadata remover. Lossless, no uploads.",
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@inlang/paraglide-js": "^2.29.0",
@@ -37,6 +37,7 @@
   "name": "pureclear",
   "scripts": {
     "build": "paraglide-js compile --outdir ./src/paraglide && astro build",
+    "paraglide": "paraglide-js compile --outdir ./src/paraglide",
     "dev": "astro dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
