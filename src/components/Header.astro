@@ -26,12 +26,22 @@ const links = [
     aria-label="Primary"
   >
     <a href={localePath(locale, '/')} class="flex items-center gap-2 font-semibold tracking-tight">
-      <span
-        class="flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-lg text-white"
+      <svg
+        class="h-8 w-8"
+        viewBox="0 0 64 64"
         aria-hidden="true"
       >
-        ◈
-      </span>
+        <rect width="64" height="64" rx="14" fill="#0071e3" />
+        <circle cx="32" cy="32" r="21" stroke="#fff" stroke-width="4" fill="none" opacity="0.35" />
+        <path
+          d="M20 34.5 28.5 43 44 25"
+          stroke="#fff"
+          stroke-width="6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+      </svg>
       <span class="text-[17px]">PureClear</span>
     </a>
 
@@ -74,15 +84,119 @@ const links = [
         </select>
       </label>
       <ThemeToggle tr={tr} />
+      {/* Hamburger — mobile only, Apple.com style (two lines → X) */}
+      <button
+        id="menu-button"
+        class="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-black/5 md:hidden dark:hover:bg-white/10"
+        aria-label={tr('nav.menu')}
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg
+          id="menu-icon-open"
+          class="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="3" y1="7" x2="17" y2="7" />
+          <line x1="3" y1="13" x2="17" y2="13" />
+        </svg>
+        <svg
+          id="menu-icon-close"
+          class="hidden h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <line x1="5" y1="5" x2="15" y2="15" />
+          <line x1="15" y1="5" x2="5" y2="15" />
+        </svg>
+      </button>
     </div>
   </nav>
 
+  {/* Mobile menu overlay — full-screen, Apple.com style */}
+  <div
+    id="mobile-menu"
+    class="invisible fixed inset-0 top-16 z-40 bg-canvas/95 opacity-0 backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden"
+    aria-hidden="true"
+  >
+    <nav class="mx-auto max-w-6xl px-6 py-8" aria-label={tr('nav.menu')}>
+      <ul class="space-y-1">
+        {
+          links.map(({ href, label }) => (
+            <li>
+              <a
+                href={href}
+                class="block rounded-2xl px-4 py-3.5 text-[19px] font-medium tracking-tight text-ink transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="mt-6 border-t border-hairline px-4 pt-6 sm:hidden">
+        <label class="block text-sm text-ink-2">
+          {tr('nav.language')}
+          <select
+            id="locale-switcher-mobile"
+            class="mt-2 w-full appearance-none rounded-2xl border border-hairline bg-card px-4 py-3 text-[16px] text-ink"
+            aria-label={tr('nav.language')}
+          >
+            {
+              LOCALES.map((l) => (
+                <option value={l} selected={l === locale}>
+                  {LOCALE_META[l].nativeLabel}
+                </option>
+              ))
+            }
+          </select>
+        </label>
+      </div>
+    </nav>
+  </div>
+
   <script is:inline define:vars={{ path }}>
     // Locale switcher: navigate to the same page in the chosen locale.
-    document.getElementById('locale-switcher')?.addEventListener('change', (e) => {
-      const next = e.target.value;
-      const url = next === 'en' ? path : `/${next}${path === '/' ? '' : path}`;
-      location.href = url || '/';
+    const switchLocale = (select) => {
+      select?.addEventListener('change', (e) => {
+        const next = e.target.value;
+        const url = next === 'en' ? path : `/${next}${path === '/' ? '' : path}`;
+        location.href = url || '/';
+      });
+    };
+    switchLocale(document.getElementById('locale-switcher'));
+    switchLocale(document.getElementById('locale-switcher-mobile'));
+
+    // Hamburger menu toggle (Apple.com style overlay).
+    const menuButton = document.getElementById('menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const iconOpen = document.getElementById('menu-icon-open');
+    const iconClose = document.getElementById('menu-icon-close');
+    const setMenu = (open) => {
+      menuButton?.setAttribute('aria-expanded', String(open));
+      mobileMenu?.setAttribute('aria-hidden', String(!open));
+      mobileMenu?.classList.toggle('invisible', !open);
+      mobileMenu?.classList.toggle('opacity-0', !open);
+      iconOpen?.classList.toggle('hidden', open);
+      iconClose?.classList.toggle('hidden', !open);
+      document.body.classList.toggle('overflow-hidden', open);
+    };
+    menuButton?.addEventListener('click', () => {
+      const open = menuButton.getAttribute('aria-expanded') !== 'true';
+      setMenu(open);
+    });
+    // Close on Escape.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setMenu(false);
     });
   </script>
 </header>
