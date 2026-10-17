@@ -1,6 +1,7 @@
 ---
-import Hero from '../Hero.astro';
+import ToolIsland from '../tool/ToolIsland';
 import Faq from '../Faq.astro';
+import { getRawMessages } from '../../lib/messages';
 import type { Locale } from '../../lib/i18n';
 import type { Translate } from '../../lib/t';
 
@@ -12,6 +13,7 @@ interface Props {
 
 const { locale, tr, format } = Astro.props;
 const upper = format.toUpperCase();
+const messages = getRawMessages(locale);
 ---
 
 {/* Format hero — Apple style: eyebrow pill + massive headline */}
@@ -29,6 +31,11 @@ const upper = format.toUpperCase();
   <p class="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-ink-2">
     {tr('formats.description', { format: upper })}
   </p>
+
+  {/* Tool only — no duplicate hero text */}
+  <div class="mx-auto mt-12 max-w-3xl text-start sm:mt-16">
+    <ToolIsland client:load locale={locale} messages={messages} />
+  </div>
 </section>
-<Hero locale={locale} tr={tr} />
+<div class="pb-8"></div>
 <Faq tr={tr} />
