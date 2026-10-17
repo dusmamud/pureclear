@@ -14,10 +14,11 @@ const { tr } = Astro.props;
   class="flex h-9 w-9 items-center justify-center rounded-full border border-hairline bg-card text-ink transition-colors hover:bg-black/5 dark:hover:bg-white/10"
   aria-label={tr('nav.toggleTheme')}
 >
-  <svg class="hidden h-[18px] w-[18px] dark:block" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+  {/* Moon in light mode (tap → dark), sun in dark mode (tap → light) */}
+  <svg class="h-[18px] w-[18px] dark:hidden" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
     <path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37.48A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37.48-52.91A8,8,0,0,0,233.54,142.23ZM128,208a80,80,0,0,1-72-45.4A80.48,80.48,0,0,1,64,98.18a80,80,0,0,1,16-16A88.37,88.37,0,0,0,128,184,88.37,88.37,0,0,0,184,128a80,80,0,0,1,45.4,72A80.89,80.89,0,0,1,128,208Z" />
   </svg>
-  <svg class="h-[18px] w-[18px] dark:hidden" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+  <svg class="hidden h-[18px] w-[18px] dark:block" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
     <path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,16a8,8,0,0,0-8-8h-8a8,8,0,0,0,0,16h8A8,8,0,0,0,192,56ZM40,120H16a8,8,0,0,0,0,16H40a8,8,0,0,0,0-16Zm136,40a8,8,0,0,0,11.31,11.31l5.66-5.66a8,8,0,0,0-11.32-11.31ZM40,88a8,8,0,0,0,11.31-11.31l-5.66-5.66A8,8,0,0,0,34.34,82.34Zm116.69,74.34a8,8,0,0,0-11.32,11.31l5.66,5.66a8,8,0,0,0,11.31-11.31ZM128,88a40,40,0,1,0,40,40A40,40,0,0,0,128,88Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,152Zm-80,8h24a8,8,0,0,0,0-16H48a8,8,0,0,0,0,16Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V248A8,8,0,0,0,128,240ZM64,176a8,8,0,0,0-8,8,8,8,0,0,0,8,8,8,8,0,0,0,5.66-2.34A8,8,0,0,0,64,176Zm128,0a8,8,0,0,0-8,8,8,8,0,0,0,8,8,8,8,0,0,0,5.66-2.34A8,8,0,0,0,192,176Z" />
   </svg>
 </button>
