@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import FormatPage from '../../../components/pages/FormatPage.astro';
+import { t } from '../../../lib/t';
+
+export function getStaticPaths() {
+  return ['jpg', 'png', 'webp', 'mp4', 'mov', 'pdf'].map((slug) => ({
+    params: { slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const locale = 'hi' as const;
+const tr = t(locale);
+const upper = (slug ?? 'file').toUpperCase();
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('formats.title', { format: upper })} — PureClear`}
+  description={tr('formats.description', { format: upper })}
+  path={`/formats/${slug}`}
+  ogImage={`/og/${slug}.png`}
+>
+  <FormatPage locale={locale} tr={tr} format={slug ?? 'file'} />
+</BaseLayout>

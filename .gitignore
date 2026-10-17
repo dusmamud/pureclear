@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+src/paraglide/
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+coverage/

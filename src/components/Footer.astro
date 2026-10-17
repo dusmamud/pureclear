@@ -1,0 +1,28 @@
+---
+import { localePath, type Locale } from '../lib/i18n';
+import type { Translate } from '../lib/t';
+
+interface Props {
+  locale: Locale;
+  tr: Translate;
+}
+
+const { locale, tr } = Astro.props;
+---
+
+<footer class="border-t border-hairline">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="font-semibold tracking-tight">PureClear</p>
+        <p class="mt-1 text-sm text-ink-2">{tr('footer.tagline')}</p>
+      </div>
+      <nav class="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-2" aria-label="Footer">
+        <a class="hover:text-ink" href={localePath(locale, '/how-it-works')}>{tr('nav.howItWorks')}</a>
+        <a class="hover:text-ink" href={localePath(locale, '/about')}>{tr('nav.about')}</a>
+        <a class="hover:text-ink" href={localePath(locale, '/privacy')}>{tr('nav.privacy')}</a>
+      </nav>
+    </div>
+    <p class="mt-8 border-t border-hairline pt-6 text-xs text-ink-2">{tr('footer.rights')}</p>
+  </div>
+</footer>

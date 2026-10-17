@@ -1,0 +1,55 @@
+---
+import type { Translate } from '../lib/t';
+
+interface Props {
+  tr: Translate;
+}
+
+const { tr } = Astro.props;
+
+const faqs = [
+  { q: tr('faq.q1'), a: tr('faq.a1') },
+  { q: tr('faq.q2'), a: tr('faq.a2') },
+  { q: tr('faq.q3'), a: tr('faq.a3') },
+  { q: tr('faq.q4'), a: tr('faq.a4') },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <h2 class="text-center text-[clamp(1.5rem,3vw,2.25rem)] font-semibold tracking-tight">
+    {tr('faq.title')}
+  </h2>
+  <div class="mt-8 divide-y divide-hairline rounded-card border border-hairline bg-card shadow-card">
+    {
+      faqs.map((f) => (
+        <details class="group px-6 py-5">
+          <summary class="cursor-pointer list-none font-medium tracking-tight [&::-webkit-details-marker]:hidden">
+            <span class="flex items-center justify-between gap-4">
+              {f.q}
+              <svg
+                class="h-4 w-4 shrink-0 text-ink-2 transition-transform group-open:rotate-180"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M213.66,165.66a8,8,0,0,1-11.32,0L128,91.31,53.66,165.66a8,8,0,0,1-11.32-11.32l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,213.66,165.66Z" />
+              </svg>
+            </span>
+          </summary>
+          <p class="mt-3 text-[15px] leading-relaxed text-ink-2">{f.a}</p>
+        </details>
+      ))
+    }
+  </div>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+</section>

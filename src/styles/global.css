@@ -1,0 +1,85 @@
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Geist Sans", "SF Pro Display", Inter,
+    "Segoe UI", system-ui, sans-serif;
+  --font-mono:
+    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Apple light */
+  --color-canvas: #f5f5f7;
+  --color-card: #ffffff;
+  --color-ink: #1d1d1f;
+  --color-ink-2: #6e6e73;
+  --color-accent: #0071e3;
+  --color-accent-hover: #0077ed;
+  --color-hairline: rgb(0 0 0 / 0.08);
+  --color-header: rgb(251 251 253 / 0.8);
+
+  --radius-card: 1.375rem; /* 22px */
+  --radius-pill: 980px;
+
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-card: 0 4px 24px rgb(0 0 0 / 0.06);
+}
+
+.dark {
+  --color-canvas: #000000;
+  --color-card: #1d1d1f;
+  --color-ink: #f5f5f7;
+  --color-ink-2: #a1a1a6;
+  --color-accent: #2997ff;
+  --color-accent-hover: #53a9ff;
+  --color-hairline: rgb(255 255 255 / 0.12);
+  --color-header: rgb(0 0 0 / 0.72);
+  --shadow-card: 0 0 0 transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-canvas text-ink font-sans antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Frosted-glass header */
+.glass-header {
+  background: var(--color-header);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Visible focus for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

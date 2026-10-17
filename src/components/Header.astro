@@ -1,0 +1,88 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { LOCALES, LOCALE_META, localePath, type Locale } from '../lib/i18n';
+import type { Translate } from '../lib/t';
+
+interface Props {
+  locale: Locale;
+  path: string;
+  tr: Translate;
+}
+
+const { locale, path, tr } = Astro.props;
+
+const links = [
+  { href: localePath(locale, '/'), label: tr('nav.home') },
+  { href: localePath(locale, '/formats/jpg'), label: tr('nav.formats') },
+  { href: localePath(locale, '/how-it-works'), label: tr('nav.howItWorks') },
+  { href: localePath(locale, '/about'), label: tr('nav.about') },
+  { href: localePath(locale, '/privacy'), label: tr('nav.privacy') },
+];
+---
+
+<header class="glass-header sticky top-0 z-50 border-b border-hairline">
+  <nav
+    class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
+    aria-label="Primary"
+  >
+    <a href={localePath(locale, '/')} class="flex items-center gap-2 font-semibold tracking-tight">
+      <span
+        class="flex h-8 w-8 items-center justify-center rounded-xl bg-accent text-lg text-white"
+        aria-hidden="true"
+      >
+        ◈
+      </span>
+      <span class="text-[17px]">PureClear</span>
+    </a>
+
+    <div class="hidden items-center gap-1 md:flex">
+      {
+        links.map(({ href, label }) => (
+          <a
+            href={href}
+            class="rounded-full px-3 py-2 text-sm text-ink-2 transition-colors hover:bg-black/5 hover:text-ink dark:hover:bg-white/10"
+          >
+            {label}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="flex items-center gap-2">
+      <label class="relative hidden items-center sm:flex">
+        <span class="sr-only">{tr('nav.language')}</span>
+        <svg
+          class="pointer-events-none absolute start-2.5 h-4 w-4 text-ink-2"
+          viewBox="0 0 256 256"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm87.63,96H175.8a173.16,173.16,0,0,0-15.38-56.27A88.12,88.12,0,0,1,215.63,120ZM128,40c11.09,0,26.52,13.78,35.72,56.31A181.16,181.16,0,0,1,168,120H88a181.16,181.16,0,0,1,4.28-23.69C101.48,53.78,116.91,40,128,40ZM40.37,120A88.12,88.12,0,0,1,95.58,63.73,173.16,173.16,0,0,0,80.2,120Zm0,16H80.2a173.16,173.16,0,0,0,15.38,56.27A88.12,88.12,0,0,1,40.37,136ZM128,216c-11.09,0-26.52-13.78-35.72-56.31A181.16,181.16,0,0,1,88,136h80a181.16,181.16,0,0,1-4.28,23.69C154.52,202.22,139.09,216,128,216Zm22.42-23.73A173.16,173.16,0,0,0,175.8,136h39.83A88.12,88.12,0,0,1,160.42,192.27Z" />
+        </svg>
+        <select
+          id="locale-switcher"
+          class="appearance-none rounded-full border border-hairline bg-card py-2 pe-3 ps-8 text-sm text-ink"
+          aria-label={tr('nav.language')}
+        >
+          {
+            LOCALES.map((l) => (
+              <option value={l} selected={l === locale}>
+                {LOCALE_META[l].nativeLabel}
+              </option>
+            ))
+          }
+        </select>
+      </label>
+      <ThemeToggle tr={tr} />
+    </div>
+  </nav>
+
+  <script is:inline define:vars={{ path }}>
+    // Locale switcher: navigate to the same page in the chosen locale.
+    document.getElementById('locale-switcher')?.addEventListener('change', (e) => {
+      const next = e.target.value;
+      const url = next === 'en' ? path : `/${next}${path === '/' ? '' : path}`;
+      location.href = url || '/';
+    });
+  </script>
+</header>

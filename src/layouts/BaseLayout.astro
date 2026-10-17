@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { t } from '../lib/t';
+import { LOCALE_META, localePath, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  path: string; // locale-agnostic path, e.g. "/about"
+  ogImage?: string;
+}
+
+const { locale, title, description, path, ogImage = '/og/default.png' } = Astro.props;
+const tr = t(locale);
+const dir = LOCALE_META[locale].dir;
+const canonical = `https://pureclear.app${localePath(locale, path)}`;
+---
+
+<!doctype html>
+<html lang={locale} dir={dir} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={`https://pureclear.app${path}`} />
+    <link rel="alternate" hreflang="hi" href={`https://pureclear.app/hi${path}`} />
+    <link rel="alternate" hreflang="as" href={`https://pureclear.app/as${path}`} />
+    <link rel="alternate" hreflang="x-default" href={`https://pureclear.app${path}`} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`https://pureclear.app${ogImage}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`https://pureclear.app${ogImage}`} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <script is:inline>
+      // Dark-mode flash fix: set class before first paint.
+      try {
+        const stored = localStorage.getItem('pureclear-theme');
+        const dark =
+          stored === 'dark' ||
+          (!stored && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-accent focus:px-4 focus:py-2 focus:text-white"
+    >
+      Skip to content
+    </a>
+    <Header locale={locale} path={path} tr={tr} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} tr={tr} />
+    <script is:inline>
+      // Theme toggle persistence (listens for the custom event from ThemeToggle)
+      addEventListener('pureclear:theme', (e) => {
+        const dark = e.detail === 'dark';
+        document.documentElement.classList.toggle('dark', dark);
+        try {
+          localStorage.setItem('pureclear-theme', dark ? 'dark' : 'light');
+        } catch {}
+      });
+    </script>
+  </body>
+</html>

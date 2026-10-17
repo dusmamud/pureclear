@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# AI crawlers explicitly allowed (AEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://pureclear.app/sitemap-index.xml

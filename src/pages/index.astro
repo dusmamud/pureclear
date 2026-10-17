@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomePage from '../components/pages/HomePage.astro';
+import { t } from '../lib/t';
+
+const locale = 'en' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={tr('meta.title')}
+  description={tr('meta.description')}
+  path="/"
+>
+  <HomePage locale={locale} tr={tr} />
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HowPage from '../../components/pages/HowPage.astro';
+import { t } from '../../lib/t';
+
+const locale = 'hi' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('how.title')} — PureClear`}
+  description={tr('how.step1Body')}
+  path="/how-it-works"
+>
+  <HowPage locale={locale} tr={tr} />
+</BaseLayout>

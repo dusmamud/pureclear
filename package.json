@@ -1,0 +1,51 @@
+{
+  "dependencies": {
+    "@astrojs/react": "^7.1.0",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource/geist-sans": "^5.3.0",
+    "@phosphor-icons/react": "^2.1.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "@uswriting/exiftool": "^1.0.9",
+    "astro": "^7.4.0",
+    "comlink": "^4.4.2",
+    "exifr": "^7.1.3",
+    "fflate": "^0.8.3",
+    "heic2any": "^0.0.4",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^6.4.299",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tailwindcss": "^4.3.3"
+  },
+  "description": "PureClear — 100% in-browser EXIF/metadata remover. Lossless, no uploads.",
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@inlang/paraglide-js": "^2.29.0",
+    "@inlang/plugin-message-format": "^4.5.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5",
+    "@inlang/cli": "^3.4.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "name": "pureclear",
+  "scripts": {
+    "build": "paraglide-js compile --outdir ./src/paraglide && astro build",
+    "dev": "astro dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "astro check",
+    "check:i18n": "inlang check --project ./project.inlang"
+  },
+  "type": "module",
+  "version": "1.0.0"
+}

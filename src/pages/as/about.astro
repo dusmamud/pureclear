@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SimplePage from '../../components/pages/SimplePage.astro';
+import { t } from '../../lib/t';
+
+const locale = 'as' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('about.title')} — PureClear`}
+  description={tr('about.body')}
+  path="/about"
+>
+  <SimplePage locale={locale} titleKey="about.title" bodyKey="about.body" tr={tr} />
+</BaseLayout>

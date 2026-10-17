@@ -1,0 +1,23 @@
+{
+  "background_color": "#f5f5f7",
+  "description": "Strip hidden EXIF/metadata from files — 100% in-browser, free forever.",
+  "display": "standalone",
+  "icons": [
+    {
+      "purpose": "any",
+      "sizes": "192x192",
+      "src": "/icon-192.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "/icon-512.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "PureClear — Remove EXIF & Metadata",
+  "short_name": "PureClear",
+  "start_url": "/",
+  "theme_color": "#f5f5f7"
+}

@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SimplePage from '../components/pages/SimplePage.astro';
+import { t } from '../lib/t';
+
+const locale = 'en' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('privacy.title')} — PureClear`}
+  description={tr('privacy.body')}
+  path="/privacy"
+>
+  <SimplePage locale={locale} titleKey="privacy.title" bodyKey="privacy.body" tr={tr} />
+</BaseLayout>

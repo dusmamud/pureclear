@@ -1,0 +1,38 @@
+---
+import type { Locale } from '../../lib/i18n';
+import type { Translate } from '../../lib/t';
+
+interface Props {
+  locale: Locale;
+  tr: Translate;
+}
+
+const { tr } = Astro.props;
+
+const steps = [1, 2, 3, 4].map((n) => ({
+  title: tr(`how.step${n}Title`),
+  body: tr(`how.step${n}Body`),
+}));
+---
+
+<section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+  <h1 class="text-[clamp(1.75rem,4vw,2.75rem)] font-semibold tracking-tight">{tr('how.title')}</h1>
+  <ol class="mt-10 space-y-4">
+    {
+      steps.map((s, i) => (
+        <li class="flex gap-5 rounded-card border border-hairline bg-card p-6 shadow-card">
+          <span
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-[17px] font-semibold text-white"
+            aria-hidden="true"
+          >
+            {i + 1}
+          </span>
+          <div>
+            <h2 class="text-[17px] font-semibold tracking-tight">{s.title}</h2>
+            <p class="mt-1.5 text-[15px] leading-relaxed text-ink-2">{s.body}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>

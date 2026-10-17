@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": ["vite/client"]
+  },
+  "extends": "astro/tsconfigs/strict",
+  "include": ["src", "tests"]
+}

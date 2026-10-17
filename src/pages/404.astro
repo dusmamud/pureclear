@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t } from '../lib/t';
+
+const locale = 'en' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('notFound.title')} — PureClear`}
+  description={tr('notFound.body')}
+  path="/404"
+>
+  <section class="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
+    <p class="text-[64px] font-semibold tracking-tight text-ink-2" aria-hidden="true">404</p>
+    <h1 class="mt-4 text-2xl font-semibold tracking-tight">{tr('notFound.title')}</h1>
+    <p class="mt-2 text-ink-2">{tr('notFound.body')}</p>
+    <a
+      href="/"
+      class="mt-8 inline-block rounded-pill bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-hover"
+    >
+      {tr('notFound.cta')}
+    </a>
+  </section>
+</BaseLayout>

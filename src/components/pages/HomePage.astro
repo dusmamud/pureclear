@@ -1,0 +1,29 @@
+---
+import Hero from '../Hero.astro';
+import Bento from '../Bento.astro';
+import Faq from '../Faq.astro';
+import type { Locale } from '../../lib/i18n';
+import type { Translate } from '../../lib/t';
+
+interface Props {
+  locale: Locale;
+  tr: Translate;
+}
+
+const { locale, tr } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'PureClear',
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Web browser',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  description: tr('meta.description'),
+};
+---
+
+<Hero locale={locale} tr={tr} />
+<Bento />
+<Faq tr={tr} />
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
