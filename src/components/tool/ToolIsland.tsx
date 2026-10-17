@@ -10,6 +10,7 @@ import {
   SpinnerGap,
 } from "@phosphor-icons/react";
 import { readTags, stripFile, disposeEngine, type Tag } from "../../lib/engine";
+import { prereadTags } from "../../lib/exifr-preread";
 import { stripPdfMetadata } from "../../lib/pdf";
 import { zipFiles, downloadBlob } from "../../lib/zip";
 import {
@@ -100,6 +101,17 @@ export default function ToolIsland({ locale, messages }: Props) {
           const info = (doc as any).getTitle ? await readPdfInfo(doc) : [];
           tags = info;
         } else {
+          // Instant pre-read via exifr (no WASM cold-start) so the inspector
+          // shows tags immediately; the authoritative ExifTool read replaces
+          // these below. Best-effort — a failed pre-read never blocks.
+          try {
+            const preview = await prereadTags(buf);
+            if (preview.length > 0) {
+              patch(state.id, { tags: preview, hasGps: hasGpsTag(preview) });
+            }
+          } catch {
+            /* pre-read is best-effort */
+          }
           tags = await readTags(buf, state.file.name);
         }
         patch(state.id, {

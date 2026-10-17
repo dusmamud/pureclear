@@ -13,8 +13,21 @@ const steps = [1, 2, 3, 4].map((n) => ({
   title: tr(`how.step${n}Title`),
   body: tr(`how.step${n}Body`),
 }));
+
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: tr("how.title"),
+  step: steps.map((s, i) => ({
+    "@type": "HowToStep",
+    position: i + 1,
+    name: s.title,
+    text: s.body,
+  })),
+};
 ---
 
+<script type="application/ld+json" set:html={JSON.stringify(howToJsonLd)} />
 <section class="mx-auto max-w-3xl px-4 py-16 sm:px-6">
   <h1 class="text-[clamp(1.75rem,4vw,2.75rem)] font-semibold tracking-tight">{tr('how.title')}</h1>
   <ol class="mt-10 space-y-4">
