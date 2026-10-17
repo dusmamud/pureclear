@@ -64,5 +64,19 @@
   "tool.tagsFound": "{count} tags mile",
   "tool.tagsRemaining": "{count} tags bache",
   "tool.tagsRemoved": "{count} tags hataye gaye",
-  "tool.unsupported": "Yeh file type abhi supported nahi hai."
+  "tool.unsupported": "Yeh file type abhi supported nahi hai.",
+  "features.eyebrow": "PureClear kyun",
+  "features.title": "Privacy, bina samjhauta.",
+  "features.subtitle": "Sab kuch aapke device par hota hai. Bharosa karne ki zaroorat nahi, kyunki bhejna hi kuch nahi.",
+  "features.c1t": "100% browser me",
+  "features.c1b": "Files aapka device kabhi nahi chhodti. No uploads, no servers, no accounts.",
+  "features.c2t": "Lossless cleaning",
+  "features.c2b": "Metadata bina re-encoding ke hataya jata hai. Pixels bilkul same rehte hain.",
+  "features.c3t": "Har format",
+  "features.c3b": "JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV aur PDF — ek hi tool.",
+  "features.c4t": "Saaf hai, proof ke saath",
+  "features.c4b": "Har file cleaning ke baad dobara scan hoti hai. Zero tags remaining — dikhaya jata hai, sirf daava nahi.",
+  "how.eyebrow": "Kaise kaam karta hai",
+  "how.subtitle": "Chaar steps. Zero uploads. Aapki files is tab ko kabhi nahi chhodti.",
+  "faq.eyebrow": "Aksar puche jaane wale sawaal"
 }

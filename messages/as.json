@@ -64,5 +64,19 @@
   "tool.tagsFound": "{count} টা টেগ পোৱা গ’ল",
   "tool.tagsRemaining": "{count} টা টেগ বাকী আছে",
   "tool.tagsRemoved": "{count} টা টেগ আঁতৰোৱা হ’ল",
-  "tool.unsupported": "এই ফাইল প্ৰকাৰ এতিয়াও সমৰ্থিত নহয়।"
+  "tool.unsupported": "এই ফাইল প্ৰকাৰ এতিয়াও সমৰ্থিত নহয়।",
+  "features.eyebrow": "কিয় PureClear",
+  "features.title": "গোপনীয়তা, কোনো আপোচ নোহোৱাকৈ।",
+  "features.subtitle": "সকলো আপোনাৰ ডিভাইচতে হয়। বিশ্বাস কৰাৰ প্ৰয়োজন নাই, কাৰণ পঠিওৱা একো নাই।",
+  "features.c1t": "১০০% ব্ৰাউজাৰত",
+  "features.c1b": "ফাইল আপোনাৰ ডিভাইচ কেতিয়াও নেৰে। No uploads, no servers, no accounts.",
+  "features.c2t": "Lossless cleaning",
+  "features.c2b": "Re-encoding নকৰাকৈ metadata আঁতৰোৱা হয়। Pixels একে থাকে।",
+  "features.c3t": "প্ৰতিটো format",
+  "features.c3b": "JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV আৰু PDF — এটাই tool।",
+  "features.c4t": "পৰিষ্কাৰ, প্ৰমাণসহ",
+  "features.c4b": "প্ৰতিটো ফাইল cleaningৰ পিছত পুনৰ scan কৰা হয়। Zero tags remaining — দেখুওৱা হয়, মাথোঁ দাবী নহয়।",
+  "how.eyebrow": "কেনেকৈ কাম কৰে",
+  "how.subtitle": "চাৰিটা step। Zero uploads। আপোনাৰ ফাইল এই tab কেতিয়াও নেৰে।",
+  "faq.eyebrow": "সঘনাই সোধা প্ৰশ্ন"
 }

@@ -12,15 +12,30 @@ const tr = t(locale);
   description={tr('notFound.body')}
   path="/404"
 >
-  <section class="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-    <p class="text-[64px] font-semibold tracking-tight text-ink-2" aria-hidden="true">404</p>
-    <h1 class="mt-4 text-2xl font-semibold tracking-tight">{tr('notFound.title')}</h1>
-    <p class="mt-2 text-ink-2">{tr('notFound.body')}</p>
+  <section class="mx-auto max-w-2xl px-4 py-28 text-center sm:px-6 sm:py-36">
+    <p
+      class="bg-gradient-to-b from-ink to-ink-2 bg-clip-text text-[88px] font-semibold leading-none tracking-[-0.03em] text-transparent sm:text-[120px]"
+      aria-hidden="true"
+    >
+      404
+    </p>
+    <h1 class="mt-6 text-[28px] font-semibold tracking-[-0.02em]">{tr('notFound.title')}</h1>
+    <p class="mx-auto mt-3 max-w-md text-[17px] leading-relaxed text-ink-2">
+      {tr('notFound.body')}
+    </p>
     <a
       href="/"
-      class="mt-8 inline-block rounded-pill bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-hover"
+      class="mt-10 inline-flex items-center gap-2 rounded-pill bg-accent px-7 py-3 text-[15px] font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
     >
       {tr('notFound.cta')}
+      <svg
+        class="h-4 w-4"
+        viewBox="0 0 256 256"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z" />
+      </svg>
     </a>
   </section>
 </BaseLayout>

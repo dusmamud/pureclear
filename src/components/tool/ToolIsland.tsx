@@ -52,6 +52,12 @@ interface Props {
   messages: Record<string, string>;
 }
 
+/** Format bytes: show KB under 1 MB (avoids "0.0 MB"), MB above. */
+function formatSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 let idCounter = 0;
 const nid = () => `f${++idCounter}`;
 
@@ -252,7 +258,7 @@ export default function ToolIsland({ locale, messages }: Props) {
 
   return (
     <div className="overflow-hidden rounded-card border border-hairline bg-card shadow-card">
-      {/* Dropzone */}
+      {/* Dropzone — Apple style: generous, calm, inviting */}
       <div
         role="button"
         tabIndex={0}
@@ -267,20 +273,26 @@ export default function ToolIsland({ locale, messages }: Props) {
         }}
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
-        className={`flex cursor-pointer flex-col items-center justify-center gap-3 px-6 py-12 text-center transition-colors ${
+        className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:py-16 ${
           dragOver
-            ? "bg-accent/10"
+            ? "scale-[1.01] bg-accent/[0.08]"
             : "hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
         }`}
       >
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
-          <CloudArrowUp size={28} weight="duotone" aria-hidden="true" />
+        <span
+          className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            dragOver ? "scale-110" : ""
+          }`}
+        >
+          <CloudArrowUp size={30} weight="duotone" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-lg font-semibold tracking-tight">
+          <p className="text-[21px] font-semibold tracking-[-0.01em]">
             {msg("tool.dropTitle")}
           </p>
-          <p className="mt-1 text-sm text-ink-2">{msg("tool.dropSubtitle")}</p>
+          <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-ink-2">
+            {msg("tool.dropSubtitle")}
+          </p>
         </div>
         <input
           ref={inputRef}
@@ -310,12 +322,12 @@ export default function ToolIsland({ locale, messages }: Props) {
               />
             ))}
           </ul>
-          <div className="flex flex-wrap items-center gap-3 border-t border-hairline bg-canvas/60 px-4 py-3 sm:px-6">
+          <div className="flex flex-wrap items-center gap-3 border-t border-hairline bg-canvas/60 px-4 py-4 sm:px-6">
             {doneCount > 1 && (
               <button
                 type="button"
                 onClick={downloadAll}
-                className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+                className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
               >
                 <FileArchive size={18} aria-hidden="true" />
                 {msg("tool.downloadAll")}
@@ -324,7 +336,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             <button
               type="button"
               onClick={reset}
-              className="inline-flex items-center gap-2 rounded-pill border border-hairline px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-pill border border-hairline px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-black/5 active:scale-[0.97] dark:hover:bg-white/10"
             >
               <ArrowCounterClockwise size={18} aria-hidden="true" />
               {msg("tool.reset")}
@@ -348,23 +360,23 @@ function FileRow({
   onDownload: () => void;
 }) {
   return (
-    <li className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:px-6">
+    <li className="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:px-6">
       {f.thumbUrl ? (
         <img
           src={f.thumbUrl}
           alt=""
-          className="h-16 w-16 shrink-0 rounded-xl border border-hairline object-cover"
+          className="h-16 w-16 shrink-0 rounded-2xl border border-hairline object-cover"
         />
       ) : (
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-hairline bg-canvas text-xl font-semibold text-ink-2">
-          {f.ext.slice(0, 3).toUpperCase()}
+        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-hairline bg-canvas text-sm font-semibold tracking-wide text-ink-2">
+          {f.ext.slice(0, 4).toUpperCase()}
         </span>
       )}
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{f.file.name}</p>
         <p className="mt-0.5 text-xs text-ink-2">
-          {(f.file.size / 1024 / 1024).toFixed(1)} MB
+          {formatSize(f.file.size)}
           {f.sizeWarn && (
             <span className="ms-2 inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
               <WarningCircle size={14} aria-hidden="true" />
@@ -440,7 +452,7 @@ function FileRow({
             <button
               type="button"
               onClick={onStrip}
-              className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+              className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
             >
               <Trash size={16} aria-hidden="true" />
               {msg("tool.remove")}
@@ -450,7 +462,7 @@ function FileRow({
           <button
             type="button"
             onClick={onDownload}
-            className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
           >
             <DownloadSimple size={16} aria-hidden="true" />
             {msg("tool.download")}

@@ -14,12 +14,21 @@ const { locale, tr, format } = Astro.props;
 const upper = format.toUpperCase();
 ---
 
-<section class="mx-auto max-w-6xl px-4 pt-14 sm:px-6">
-  <p class="text-sm font-medium text-accent">{upper}</p>
-  <h1 class="mt-2 max-w-3xl text-[clamp(1.75rem,4vw,3rem)] font-semibold tracking-tight">
+{/* Format hero — Apple style: eyebrow pill + massive headline */}
+<section class="mx-auto max-w-6xl px-4 pt-16 text-center sm:px-6 sm:pt-24">
+  <p
+    class="inline-flex items-center rounded-full bg-accent/10 px-4 py-1.5 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent"
+  >
+    {upper}
+  </p>
+  <h1
+    class="mx-auto mt-5 max-w-3xl text-[clamp(2rem,5vw,3.5rem)] font-semibold leading-[1.08] tracking-[-0.025em]"
+  >
     {tr('formats.title', { format: upper })}
   </h1>
-  <p class="mt-4 max-w-2xl text-ink-2">{tr('formats.description', { format: upper })}</p>
+  <p class="mx-auto mt-5 max-w-2xl text-[17px] leading-relaxed text-ink-2">
+    {tr('formats.description', { format: upper })}
+  </p>
 </section>
 <Hero locale={locale} tr={tr} />
 <Faq tr={tr} />
