@@ -1,6 +1,15 @@
 import * as Comlink from "comlink";
 import { parseMetadata, writeMetadata } from "@uswriting/exiftool";
 
+// zeroperl's browser detection is `typeof window !== "u" && typeof document !== "u"`.
+// Web Workers have neither, so without this shim it falls into the Node.js branch
+// and tries `import("node:fs/promises")` — which throws in a browser worker.
+// Shimming both (before first parseMetadata call) routes it to the fetch() path,
+// where our custom `wasmFetch` below takes over. The check runs lazily inside
+// ZeroPerl.create(), not at import time, so module-body assignment is sufficient.
+(globalThis as any).window ??= globalThis;
+(globalThis as any).document ??= {};
+
 export interface Tag {
   group: string;
   name: string;
