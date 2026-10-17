@@ -14,6 +14,16 @@ const HIDDEN_GROUPS = new Set(["Composite", "ExifTool", "System", "File"]);
 export const STRIP_ARGS = ["-all=", "--icc_profile:all"];
 const READ_ARGS = ["-G"];
 
+/**
+ * Self-hosted WASM URL. The zeroperl loader fetches "./zeroperl.wasm"
+ * relative to the worker script by default (which 404s after bundling),
+ * but @uswriting/exiftool accepts a custom `fetch` — so we point it at
+ * our own /wasm/zeroperl.wasm (copied from node_modules at build time,
+ * served with application/wasm via public/_headers). Zero third-party CDN.
+ */
+const WASM_URL = "/wasm/zeroperl.wasm";
+const wasmFetch = () => fetch(WASM_URL);
+
 /** Parse `exiftool -G` text output into tag objects. */
 export function parseExifToolText(text: string): Tag[] {
   const tags: Tag[] = [];
@@ -39,7 +49,7 @@ const api = {
   async read(buffer: ArrayBuffer, filename: string): Promise<Tag[]> {
     const result = await parseMetadata(
       { name: filename, data: new Uint8Array(buffer) },
-      { args: READ_ARGS },
+      { args: READ_ARGS, fetch: wasmFetch },
     );
     if (!result.success) {
       throw new Error(result.error || "Failed to read metadata");
@@ -58,11 +68,18 @@ const api = {
   ): Promise<{ data: ArrayBuffer; removedCount: number; remaining: Tag[] }> {
     const file = { name: filename, data: new Uint8Array(buffer) };
 
-    const before = await parseMetadata(file, { args: READ_ARGS });
+    const before = await parseMetadata(file, {
+      args: READ_ARGS,
+      fetch: wasmFetch,
+    });
     const beforeTags =
       before.success && before.data ? parseExifToolText(before.data) : [];
 
-    const stripped = await writeMetadata(file, {}, { args: STRIP_ARGS });
+    const stripped = await writeMetadata(
+      file,
+      {},
+      { args: STRIP_ARGS, fetch: wasmFetch },
+    );
     if (!stripped.success) {
       throw new Error(stripped.error || "Failed to strip metadata");
     }
@@ -75,7 +92,7 @@ const api = {
     try {
       const check = await parseMetadata(
         { name: filename, data: new Uint8Array(cleanedBuffer) },
-        { args: READ_ARGS },
+        { args: READ_ARGS, fetch: wasmFetch },
       );
       if (check.success && check.data)
         remaining = parseExifToolText(check.data);

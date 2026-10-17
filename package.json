@@ -36,9 +36,10 @@
   "license": "MIT",
   "name": "pureclear",
   "scripts": {
+    "prebuild": "node scripts/copy-wasm.mjs",
     "build": "paraglide-js compile --outdir ./src/paraglide && astro build",
     "paraglide": "paraglide-js compile --outdir ./src/paraglide",
-    "dev": "astro dev",
+    "dev": "node scripts/copy-wasm.mjs && astro dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "astro preview",

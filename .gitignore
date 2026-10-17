@@ -9,3 +9,6 @@ Thumbs.db
 .env.*
 !.env.example
 coverage/
+
+# Self-hosted ExifTool WASM (~25MB) — copied from node_modules at build time
+public/wasm/
