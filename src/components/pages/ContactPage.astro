@@ -1,4 +1,6 @@
 ---
+import ReportForm from '../ReportForm.astro';
+import FeedbackForm from '../FeedbackForm.astro';
 import { localePath, type Locale } from '../../lib/i18n';
 import type { Translate } from '../../lib/t';
 
@@ -87,6 +89,12 @@ const topics = [1, 2, 3].map((n) => ({
           </div>
         ))
       }
+    </div>
+
+    {/* Forms — report a problem / share feedback */}
+    <div class="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-6 lg:grid-cols-2">
+      <ReportForm tr={tr} />
+      <FeedbackForm tr={tr} />
     </div>
 
     {/* Back CTA */}

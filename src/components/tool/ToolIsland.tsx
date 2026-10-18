@@ -23,6 +23,7 @@ import {
   getExtension,
   isSupported,
   MAX_FILE_SIZE_WARN,
+  localePath,
   type Locale,
 } from "../../lib/i18n";
 
@@ -335,6 +336,7 @@ export default function ToolIsland({ locale, messages }: Props) {
                 key={f.id}
                 state={f}
                 msg={msg}
+                locale={locale}
                 onStrip={() => stripOne(f)}
                 onDownload={() => downloadOne(f)}
               />
@@ -361,14 +363,26 @@ export default function ToolIsland({ locale, messages }: Props) {
 function FileRow({
   state: f,
   msg,
+  locale,
   onStrip,
   onDownload,
 }: {
   state: FileState;
   msg: MsgFn;
+  locale: Locale;
   onStrip: () => void;
   onDownload: () => void;
 }) {
+  // Privacy-first report link: only the sanitized reason, extension and
+  // byte size travel in the URL — never the file name.
+  const reportUrl =
+    localePath(locale, "/contact") +
+    "?report=1&reason=" +
+    encodeURIComponent(f.errorKey ?? "tool.error") +
+    "&ext=" +
+    encodeURIComponent(f.ext) +
+    "&size=" +
+    f.file.size;
   return (
     <li className="px-4 py-5 sm:px-6">
       {/* Header row: thumbnail + file info + actions */}
@@ -428,10 +442,18 @@ function FileRow({
           )}
 
           {f.status === "error" && (
-            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
-              <WarningCircle size={14} aria-hidden="true" />
-              {msg(f.errorKey ?? "tool.error")}
-            </p>
+            <div className="mt-1.5">
+              <p className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+                <WarningCircle size={14} aria-hidden="true" />
+                {msg(f.errorKey ?? "tool.error")}
+              </p>
+              <a
+                href={reportUrl}
+                className="mt-1 inline-block text-xs font-medium text-accent underline-offset-2 hover:underline"
+              >
+                {msg("tool.reportIssue")}
+              </a>
+            </div>
           )}
         </div>
 

@@ -1,0 +1,148 @@
+---
+import { REPORT_API_BASE } from '../lib/report';
+import type { Translate } from '../lib/t';
+
+interface Props {
+  tr: Translate;
+}
+
+const { tr } = Astro.props;
+
+const categories = [
+  { value: 'bug', label: tr('feedback.catBug') },
+  { value: 'idea', label: tr('feedback.catIdea') },
+  { value: 'other', label: tr('feedback.catOther') },
+];
+---
+
+<div
+  id="feedback"
+  data-feedback-form
+  data-api-base={REPORT_API_BASE}
+  data-not-configured={tr('feedback.notConfigured')}
+  data-sending={tr('feedback.sending')}
+  data-success={tr('feedback.success')}
+  data-error={tr('feedback.error')}
+  class="rounded-[24px] bg-card p-6 ring-1 ring-hairline sm:p-8"
+>
+  <h3 class="text-[20px] font-semibold tracking-[-0.01em] sm:text-[22px]">
+    {tr('feedback.title')}
+  </h3>
+  <p class="mt-2 text-[15px] leading-relaxed text-ink-2">
+    {tr('feedback.intro')}
+  </p>
+
+  <form data-form class="mt-6">
+    <fieldset>
+      <legend class="text-[14px] font-medium">{tr('feedback.categoryLabel')}</legend>
+      <div class="mt-2 flex flex-wrap gap-2">
+        {
+          categories.map((c, i) => (
+            <label class="cursor-pointer">
+              <input type="radio" name="category" value={c.value} checked={i === 0} class="peer sr-only" />
+              <span class="inline-block rounded-full border border-hairline px-4 py-2 text-[14px] font-medium text-ink-2 transition-colors peer-checked:border-accent peer-checked:bg-accent/10 peer-checked:text-accent">
+                {c.label}
+              </span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <label for="feedback-message" class="mt-5 block text-[14px] font-medium">
+      {tr('feedback.messageLabel')}
+    </label>
+    <textarea
+      id="feedback-message"
+      data-message
+      rows="4"
+      maxlength="2000"
+      required
+      placeholder={tr('feedback.messagePlaceholder')}
+      class="mt-2 w-full rounded-2xl border border-hairline bg-canvas/70 px-4 py-3 text-[15px] text-ink placeholder:text-ink-2/60 focus:border-accent focus:outline-none"
+    ></textarea>
+    <p class="mt-3 text-[13px] leading-relaxed text-ink-2">
+      {tr('feedback.privacyNote')}
+    </p>
+
+    <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <button
+        type="submit"
+        data-submit
+        class="inline-flex items-center justify-center rounded-full bg-accent px-7 py-3 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+      >
+        {tr('feedback.submit')}
+      </button>
+      <p data-status class="text-[14px] text-ink-2" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</div>
+
+<script is:inline define:vars={{ apiBase: REPORT_API_BASE }}>
+  (() => {
+    const root = document.querySelector('[data-feedback-form]');
+    if (!root) return;
+
+    const browserFamily = () => {
+      const ua = navigator.userAgent;
+      if (/\bEdg\b/.test(ua)) return 'Edge';
+      if (/\bFirefox\b/.test(ua)) return 'Firefox';
+      if (/\bChrome\b/.test(ua)) return 'Chrome';
+      if (/\bSafari\b/.test(ua)) return 'Safari';
+      return 'Other';
+    };
+    const osFamily = () => {
+      const ua = navigator.userAgent;
+      if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+      if (/Android/.test(ua)) return 'Android';
+      if (/Mac/.test(ua)) return 'macOS';
+      if (/Win/.test(ua)) return 'Windows';
+      if (/Linux/.test(ua)) return 'Linux';
+      return 'Other';
+    };
+
+    const form = root.querySelector('[data-form]');
+    const status = root.querySelector('[data-status]');
+    const submitBtn = root.querySelector('[data-submit]');
+    const messageEl = root.querySelector('[data-message]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!apiBase) {
+        status.textContent = root.dataset.notConfigured || 'Feedback is not available yet.';
+        return;
+      }
+      const category = form.querySelector('input[name="category"]:checked')?.value || 'other';
+      submitBtn.disabled = true;
+      status.textContent = root.dataset.sending || 'Sending…';
+      const payload = {
+        type: 'feedback',
+        category,
+        browser: browserFamily(),
+        os: osFamily(),
+        appVersion: '1.0.0',
+        message: (messageEl.value || '').slice(0, 2000),
+        page: location.pathname.replace(/^\/(hi|as)(?=\/|$)/, '') || '/',
+        timestamp: new Date().toISOString(),
+      };
+      try {
+        const res = await fetch(apiBase + '/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          status.textContent = root.dataset.success || 'Thanks for the feedback!';
+          form.reset();
+        } else {
+          status.textContent =
+            (root.dataset.error || 'Could not send. Please try again.') + ` (HTTP ${res.status})`;
+        }
+      } catch {
+        status.textContent = root.dataset.error || 'Could not send. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
+</script>

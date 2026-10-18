@@ -1,0 +1,166 @@
+---
+import { REPORT_API_BASE } from '../lib/report';
+import type { Translate } from '../lib/t';
+
+interface Props {
+  tr: Translate;
+}
+
+const { tr } = Astro.props;
+---
+
+<div
+  id="report"
+  data-report-form
+  data-api-base={REPORT_API_BASE}
+  data-not-configured={tr('report.notConfigured')}
+  data-sending={tr('report.sending')}
+  data-success={tr('report.success')}
+  data-error={tr('report.error')}
+  class="rounded-[24px] bg-card p-6 ring-1 ring-hairline sm:p-8"
+>
+  <h3 class="text-[20px] font-semibold tracking-[-0.01em] sm:text-[22px]">
+    {tr('report.title')}
+  </h3>
+  <p class="mt-2 text-[15px] leading-relaxed text-ink-2">
+    {tr('report.intro')}
+  </p>
+
+  {/* Auto-filled diagnostics — read-only, sanitized */}
+  <dl data-diagnostics class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+    <div class="rounded-2xl bg-canvas/70 px-4 py-3 ring-1 ring-hairline">
+      <dt class="text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-2">
+        {tr('report.reasonLabel')}
+      </dt>
+      <dd data-field-reason class="mt-1 text-[14px] font-medium">—</dd>
+    </div>
+    <div class="rounded-2xl bg-canvas/70 px-4 py-3 ring-1 ring-hairline">
+      <dt class="text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-2">
+        {tr('report.fileTypeLabel')}
+      </dt>
+      <dd data-field-ext class="mt-1 text-[14px] font-medium uppercase">—</dd>
+    </div>
+    <div class="rounded-2xl bg-canvas/70 px-4 py-3 ring-1 ring-hairline">
+      <dt class="text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-2">
+        {tr('report.sizeLabel')}
+      </dt>
+      <dd data-field-size class="mt-1 text-[14px] font-medium">—</dd>
+    </div>
+  </dl>
+  <p class="mt-3 text-[13px] leading-relaxed text-ink-2">
+    {tr('report.privacyNote')}
+  </p>
+
+  <form data-form class="mt-6">
+    <label for="report-message" class="block text-[14px] font-medium">
+      {tr('report.messageLabel')}
+      <span class="font-normal text-ink-2">({tr('report.optional')})</span>
+    </label>
+    <textarea
+      id="report-message"
+      data-message
+      rows="4"
+      maxlength="2000"
+      placeholder={tr('report.messagePlaceholder')}
+      class="mt-2 w-full rounded-2xl border border-hairline bg-canvas/70 px-4 py-3 text-[15px] text-ink placeholder:text-ink-2/60 focus:border-accent focus:outline-none"
+    ></textarea>
+
+    <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <button
+        type="submit"
+        data-submit
+        class="inline-flex items-center justify-center rounded-full bg-accent px-7 py-3 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+      >
+        {tr('report.submit')}
+      </button>
+      <p data-status class="text-[14px] text-ink-2" role="status" aria-live="polite"></p>
+    </div>
+  </form>
+</div>
+
+<script is:inline define:vars={{ apiBase: REPORT_API_BASE }}>
+  (() => {
+    const root = document.querySelector('[data-report-form]');
+    if (!root) return;
+    const params = new URLSearchParams(location.search);
+
+    const sizeBucket = (bytes) => {
+      const mb = bytes / (1024 * 1024);
+      if (!(mb >= 0)) return '—';
+      if (mb < 1) return '<1MB';
+      if (mb < 10) return '1-10MB';
+      if (mb < 100) return '10-100MB';
+      return '>100MB';
+    };
+    const browserFamily = () => {
+      const ua = navigator.userAgent;
+      if (/\bEdg\b/.test(ua)) return 'Edge';
+      if (/\bFirefox\b/.test(ua)) return 'Firefox';
+      if (/\bChrome\b/.test(ua)) return 'Chrome';
+      if (/\bSafari\b/.test(ua)) return 'Safari';
+      return 'Other';
+    };
+    const osFamily = () => {
+      const ua = navigator.userAgent;
+      if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+      if (/Android/.test(ua)) return 'Android';
+      if (/Mac/.test(ua)) return 'macOS';
+      if (/Win/.test(ua)) return 'Windows';
+      if (/Linux/.test(ua)) return 'Linux';
+      return 'Other';
+    };
+
+    const reason = (params.get('reason') || '').slice(0, 40) || 'unknown';
+    const ext = (params.get('ext') || '').toLowerCase().slice(0, 10) || '—';
+    const sizeBytes = parseInt(params.get('size') || '', 10);
+
+    root.querySelector('[data-field-reason]').textContent = reason;
+    root.querySelector('[data-field-ext]').textContent = ext;
+    root.querySelector('[data-field-size]').textContent = sizeBucket(sizeBytes);
+
+    const form = root.querySelector('[data-form]');
+    const status = root.querySelector('[data-status]');
+    const submitBtn = root.querySelector('[data-submit]');
+    const messageEl = root.querySelector('[data-message]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!apiBase) {
+        status.textContent = root.dataset.notConfigured || 'Reporting is not available yet.';
+        return;
+      }
+      submitBtn.disabled = true;
+      status.textContent = root.dataset.sending || 'Sending…';
+      const payload = {
+        type: 'report',
+        reason,
+        fileExt: ext === '—' ? '' : ext,
+        sizeBucket: sizeBucket(sizeBytes),
+        browser: browserFamily(),
+        os: osFamily(),
+        appVersion: '1.0.0',
+        message: (messageEl.value || '').slice(0, 2000),
+        page: location.pathname.replace(/^\/(hi|as)(?=\/|$)/, '') || '/',
+        timestamp: new Date().toISOString(),
+      };
+      try {
+        const res = await fetch(apiBase + '/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          status.textContent = root.dataset.success || 'Thanks — report sent.';
+          form.reset();
+        } else {
+          status.textContent =
+            (root.dataset.error || 'Could not send. Please try again.') + ` (HTTP ${res.status})`;
+        }
+      } catch {
+        status.textContent = root.dataset.error || 'Could not send. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  })();
+</script>
