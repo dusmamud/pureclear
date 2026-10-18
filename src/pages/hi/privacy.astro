@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import SimplePage from '../../components/pages/SimplePage.astro';
+import PrivacyPage from '../../components/pages/PrivacyPage.astro';
 import { t } from '../../lib/t';
 
 const locale = 'hi' as const;
@@ -13,5 +13,5 @@ const tr = t(locale);
   description={tr('privacy.body')}
   path="/privacy"
 >
-  <SimplePage locale={locale} titleKey="privacy.title" bodyKey="privacy.body" tr={tr} />
+  <PrivacyPage locale={locale} tr={tr} />
 </BaseLayout>

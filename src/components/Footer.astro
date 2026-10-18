@@ -8,45 +8,70 @@ interface Props {
 }
 
 const { locale, tr } = Astro.props;
+
+const productLinks = [
+  { label: tr('nav.home'), href: localePath(locale, '/') },
+  { label: tr('nav.howItWorks'), href: localePath(locale, '/how-it-works') },
+];
+
+const companyLinks = [
+  { label: tr('nav.about'), href: localePath(locale, '/about') },
+  { label: tr('nav.privacy'), href: localePath(locale, '/privacy') },
+];
 ---
 
-{/* Footer — Apple style: fine print, calm, minimal */}
+{/* Footer — Apple style: directory columns, calm fine print */}
 <footer class="border-t border-hairline bg-card/50">
-  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-    <div class="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+  <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
+    <div class="grid grid-cols-1 gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
+      {/* Brand */}
       <div class="max-w-xs">
         <p class="flex items-center gap-2 text-[17px] font-semibold tracking-tight">
-          <img src="/logo.svg" alt="" class="h-6 w-6" />
+          <img src="/logo.svg" alt="" class="h-7 w-7" />
           PureClear
         </p>
-        <p class="mt-2 text-[13px] leading-relaxed text-ink-2">{tr('footer.tagline')}</p>
+        <p class="mt-3 text-[14px] leading-relaxed text-ink-2">{tr('footer.tagline')}</p>
+        <p class="mt-3 text-[14px] leading-relaxed text-ink-2">{tr('footer.note')}</p>
       </div>
-      <nav
-        class="grid grid-cols-2 gap-x-12 gap-y-3 text-[14px] sm:flex sm:gap-x-8"
-        aria-label="Footer"
-      >
-        <a
-          class="text-ink-2 transition-colors hover:text-ink"
-          href={localePath(locale, '/how-it-works')}
-        >
-          {tr('nav.howItWorks')}
-        </a>
-        <a
-          class="text-ink-2 transition-colors hover:text-ink"
-          href={localePath(locale, '/about')}
-        >
-          {tr('nav.about')}
-        </a>
-        <a
-          class="text-ink-2 transition-colors hover:text-ink"
-          href={localePath(locale, '/privacy')}
-        >
-          {tr('nav.privacy')}
-        </a>
+      {/* Product column */}
+      <nav aria-label={tr('footer.product')}>
+        <p class="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink">
+          {tr('footer.product')}
+        </p>
+        <ul class="mt-4 space-y-3 text-[14px]">
+          {
+            productLinks.map((l) => (
+              <li>
+                <a class="text-ink-2 transition-colors hover:text-ink" href={l.href}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      {/* Company column */}
+      <nav aria-label={tr('footer.company')}>
+        <p class="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink">
+          {tr('footer.company')}
+        </p>
+        <ul class="mt-4 space-y-3 text-[14px]">
+          {
+            companyLinks.map((l) => (
+              <li>
+                <a class="text-ink-2 transition-colors hover:text-ink" href={l.href}>
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
       </nav>
     </div>
-    <p class="mt-10 border-t border-hairline pt-6 text-[12px] leading-relaxed text-ink-2">
-      {tr('footer.rights')}
-    </p>
+    {/* Fine print */}
+    <div class="mt-12 border-t border-hairline pt-6">
+      <p class="text-[12px] leading-relaxed text-ink-2">{tr('footer.rights')}</p>
+      <p class="mt-2 text-[12px] leading-relaxed text-ink-2">{tr('footer.fineprint')}</p>
+    </div>
   </div>
 </footer>

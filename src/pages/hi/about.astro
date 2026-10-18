@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import SimplePage from '../../components/pages/SimplePage.astro';
+import AboutPage from '../../components/pages/AboutPage.astro';
 import { t } from '../../lib/t';
 
 const locale = 'hi' as const;
@@ -13,5 +13,5 @@ const tr = t(locale);
   description={tr('about.body')}
   path="/about"
 >
-  <SimplePage locale={locale} titleKey="about.title" bodyKey="about.body" tr={tr} />
+  <AboutPage locale={locale} tr={tr} />
 </BaseLayout>

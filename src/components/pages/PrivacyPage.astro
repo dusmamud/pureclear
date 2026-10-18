@@ -1,0 +1,92 @@
+---
+import { localePath, type Locale } from '../../lib/i18n';
+import type { Translate } from '../../lib/t';
+
+interface Props {
+  locale: Locale;
+  tr: Translate;
+}
+
+const { locale, tr } = Astro.props;
+
+const sections = [1, 2, 3, 4, 5].map((n) => ({
+  title: tr(`privacy.s${n}t`),
+  body: tr(`privacy.s${n}b`),
+}));
+---
+
+{/* Hero — Apple style with product visual */}
+<section class="mx-auto max-w-6xl px-4 pb-12 pt-16 text-center sm:px-6 sm:pb-16 sm:pt-24">
+  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+    {tr('privacy.eyebrow')}
+  </p>
+  <h1
+    class="mx-auto mt-4 max-w-4xl text-[clamp(2.25rem,5.5vw,4rem)] font-semibold leading-[1.06] tracking-[-0.025em]"
+  >
+    {tr('privacy.title')}
+  </h1>
+  <p
+    class="mx-auto mt-6 max-w-2xl text-[clamp(1.0625rem,2vw,1.3125rem)] leading-[1.5] tracking-[-0.01em] text-ink-2"
+  >
+    {tr('privacy.intro')}
+  </p>
+  <div class="mx-auto mt-10 max-w-xl sm:mt-12">
+    <img
+      src="/images/privacy-shield.webp"
+      alt={tr('privacy.imageAlt')}
+      class="h-auto w-full"
+      width="1920"
+      height="1280"
+      fetchpriority="high"
+    />
+  </div>
+</section>
+
+{/* Sections — Apple privacy page style: numbered, generous */}
+<section class="border-t border-hairline bg-card/40">
+  <div class="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
+    <ol class="space-y-12 sm:space-y-16">
+      {
+        sections.map((s, i) => (
+          <li class="flex gap-5 sm:gap-7">
+            <span
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-[15px] font-semibold text-accent"
+              aria-hidden="true"
+            >
+              {i + 1}
+            </span>
+            <div>
+              <h2 class="text-[21px] font-semibold tracking-[-0.01em] sm:text-[24px]">
+                {s.title}
+              </h2>
+              <p class="mt-3 text-[16px] leading-[1.7] text-ink-2 sm:text-[17px]">
+                {s.body}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="mt-16 border-t border-hairline pt-6 text-[13px] text-ink-2">
+      {tr('privacy.updated')}
+    </p>
+  </div>
+</section>
+
+{/* CTA */}
+<section class="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
+  <h2
+    class="text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.02em]"
+  >
+    {tr('privacy.ctaTitle')}
+  </h2>
+  <p class="mx-auto mt-4 max-w-xl text-[17px] leading-relaxed text-ink-2">
+    {tr('privacy.ctaBody')}
+  </p>
+  <a
+    href={localePath(locale, '/')}
+    class="mt-8 inline-flex items-center justify-center rounded-pill bg-accent px-8 py-3.5 text-[17px] font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+  >
+    {tr('privacy.ctaButton')}
+  </a>
+</section>
