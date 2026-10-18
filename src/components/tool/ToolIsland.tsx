@@ -403,32 +403,66 @@ function FileRow({
         )}
 
         {f.status === "ready" && (
-          <div className="mt-1.5 text-xs">
-            <p className="text-ink-2">
-              {msg("tool.tagsFound", { count: f.tags.length })}
-            </p>
-            {f.hasGps && (
-              <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 font-medium text-amber-700 dark:text-amber-300">
-                <WarningCircle size={14} aria-hidden="true" />
-                {msg("tool.gpsWarning")}
+          <div className="mt-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <p className="text-[13px] font-medium text-ink-2">
+                {msg("tool.tagsFound", { count: f.tags.length })}
               </p>
-            )}
+              {f.hasGps && (
+                <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                  <WarningCircle size={14} aria-hidden="true" />
+                  {msg("tool.gpsWarning")}
+                </p>
+              )}
+            </div>
             {f.tags.length > 0 && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-accent">
-                  {msg("inspector.before")}
-                </summary>
-                <dl className="mt-2 max-h-40 overflow-auto rounded-xl border border-hairline bg-canvas p-3 font-mono text-[11px] tabular-nums">
-                  {f.tags.slice(0, 50).map((tag, i) => (
-                    <div key={i} className="flex gap-2 py-0.5">
-                      <dt className="shrink-0 text-ink-2">
-                        [{tag.group}] {tag.name}
-                      </dt>
-                      <dd className="truncate">{tag.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </details>
+              <div className="mt-2.5 overflow-hidden rounded-xl border border-hairline">
+                <div className="max-h-56 overflow-auto">
+                  <table className="w-full text-[13px]">
+                    <thead className="sticky top-0 z-10">
+                      <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
+                        <th
+                          scope="col"
+                          className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                        >
+                          {msg("inspector.tag")}
+                        </th>
+                        <th
+                          scope="col"
+                          className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                        >
+                          {msg("inspector.value")}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-hairline">
+                      {f.tags.slice(0, 100).map((tag, i) => (
+                        <tr
+                          key={i}
+                          className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
+                        >
+                          <td className="px-3 py-[7px] align-top">
+                            <span className="block font-medium leading-snug text-ink">
+                              {tag.name}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
+                              {tag.group}
+                            </span>
+                          </td>
+                          <td className="max-w-0 px-3 py-[7px] align-top">
+                            <span
+                              className="block truncate font-mono text-[12px] leading-snug text-ink-2"
+                              title={tag.value}
+                            >
+                              {tag.value}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             )}
           </div>
         )}

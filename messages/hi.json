@@ -30,7 +30,6 @@
   "how.step4Title": "Result verify karein",
   "how.title": "Kaise kaam karta hai",
   "inspector.after": "Saaf karne ke baad",
-  "inspector.before": "Mila",
   "meta.description": "Photos, videos aur PDFs se EXIF, GPS aur chhupa metadata hatayein. 100% browser me, lossless, koi upload nahi. Hamesha free.",
   "meta.title": "PureClear — EXIF aur Metadata Online Hatayein, Free",
   "nav.about": "About",
@@ -79,5 +78,7 @@
   "how.eyebrow": "Kaise kaam karta hai",
   "how.subtitle": "Chaar steps. Zero uploads. Aapki files is tab ko kabhi nahi chhodti.",
   "faq.eyebrow": "Aksar puche jaane wale sawaal",
-  "tool.yourFiles": "Aapki files ({count})"
+  "tool.yourFiles": "Aapki files ({count})",
+  "inspector.tag": "टैग",
+  "inspector.value": "वैल्यू"
 }

@@ -30,7 +30,6 @@
   "how.step4Title": "ফলাফল সত্যাপন কৰক",
   "how.title": "কেনেকৈ কাম কৰে",
   "inspector.after": "চাফা কৰাৰ পিছত",
-  "inspector.before": "পোৱা গ’ল",
   "meta.description": "ফটো, ভিডিঅ’ আৰু PDFৰ পৰা EXIF, GPS আৰু লুকাই থকা মেটাডাটা আঁতৰাওক। 100% ব্ৰাউজাৰতে, lossless, আপলোড নাই। সদায় বিনামূলীয়া।",
   "meta.title": "PureClear — EXIF আৰু মেটাডাটা অনলাইনত আঁতৰাওক, বিনামূলীয়া",
   "nav.about": "বিষয়ে",
@@ -79,5 +78,7 @@
   "how.eyebrow": "কেনেকৈ কাম কৰে",
   "how.subtitle": "চাৰিটা step। Zero uploads। আপোনাৰ ফাইল এই tab কেতিয়াও নেৰে।",
   "faq.eyebrow": "সঘনাই সোধা প্ৰশ্ন",
-  "tool.yourFiles": "আপোনাৰ ফাইলসমূহ ({count})"
+  "tool.yourFiles": "আপোনাৰ ফাইলসমূহ ({count})",
+  "inspector.tag": "টেগ",
+  "inspector.value": "মান"
 }

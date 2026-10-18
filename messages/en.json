@@ -30,7 +30,6 @@
   "how.step4Title": "Verify the result",
   "how.title": "How it works",
   "inspector.after": "After cleaning",
-  "inspector.before": "Found",
   "meta.description": "Strip EXIF, GPS and hidden metadata from photos, videos and PDFs. 100% in-browser, lossless, no uploads. Free forever.",
   "meta.title": "PureClear — Remove EXIF & Metadata Online, Free",
   "nav.about": "About",
@@ -79,5 +78,7 @@
   "how.eyebrow": "How it works",
   "how.subtitle": "Four steps. Zero uploads. Your files never leave this tab.",
   "faq.eyebrow": "FAQ",
-  "tool.yourFiles": "Your files ({count})"
+  "tool.yourFiles": "Your files ({count})",
+  "inspector.tag": "Tag",
+  "inspector.value": "Value"
 }
