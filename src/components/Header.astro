@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
-import { LOCALES, LOCALE_META, localePath, type Locale } from '../lib/i18n';
+import LocaleDropdown from './LocaleDropdown.astro';
+import { localePath, type Locale } from '../lib/i18n';
 import type { Translate } from '../lib/t';
 
 interface Props {
@@ -44,30 +45,14 @@ const links = [
     </div>
 
     <div class="flex items-center gap-2">
-      <label class="relative hidden items-center sm:flex">
-        <span class="sr-only">{tr('nav.language')}</span>
-        <svg
-          class="pointer-events-none absolute start-2.5 h-4 w-4 text-ink-2"
-          viewBox="0 0 256 256"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm87.63,96H175.8a173.16,173.16,0,0,0-15.38-56.27A88.12,88.12,0,0,1,215.63,120ZM128,40c11.09,0,26.52,13.78,35.72,56.31A181.16,181.16,0,0,1,168,120H88a181.16,181.16,0,0,1,4.28-23.69C101.48,53.78,116.91,40,128,40ZM40.37,120A88.12,88.12,0,0,1,95.58,63.73,173.16,173.16,0,0,0,80.2,120Zm0,16H80.2a173.16,173.16,0,0,0,15.38,56.27A88.12,88.12,0,0,1,40.37,136ZM128,216c-11.09,0-26.52-13.78-35.72-56.31A181.16,181.16,0,0,1,88,136h80a181.16,181.16,0,0,1-4.28,23.69C154.52,202.22,139.09,216,128,216Zm22.42-23.73A173.16,173.16,0,0,0,175.8,136h39.83A88.12,88.12,0,0,1,160.42,192.27Z" />
-        </svg>
-        <select
-          id="locale-switcher"
-          class="appearance-none rounded-full border border-hairline bg-card py-2 pe-3 ps-8 text-sm text-ink"
-          aria-label={tr('nav.language')}
-        >
-          {
-            LOCALES.map((l) => (
-              <option value={l} selected={l === locale}>
-                {LOCALE_META[l].nativeLabel}
-              </option>
-            ))
-          }
-        </select>
-      </label>
+      <LocaleDropdown
+        locale={locale}
+        path={path}
+        tr={tr}
+        id="locale-desktop"
+        variant="pill"
+        wrapperClass="hidden sm:block"
+      />
       <ThemeToggle tr={tr} />
       {/* Hamburger — mobile only, Apple.com style (two lines → X) */}
       <button
@@ -129,38 +114,18 @@ const links = [
         }
       </ul>
       <div class="mt-6 border-t border-hairline px-4 pt-6 sm:hidden">
-        <label class="block text-sm text-ink-2">
-          {tr('nav.language')}
-          <select
-            id="locale-switcher-mobile"
-            class="mt-2 w-full appearance-none rounded-2xl border border-hairline bg-card px-4 py-3 text-[16px] text-ink"
-            aria-label={tr('nav.language')}
-          >
-            {
-              LOCALES.map((l) => (
-                <option value={l} selected={l === locale}>
-                  {LOCALE_META[l].nativeLabel}
-                </option>
-              ))
-            }
-          </select>
-        </label>
+        <LocaleDropdown
+          locale={locale}
+          path={path}
+          tr={tr}
+          id="locale-mobile"
+          variant="full"
+        />
       </div>
     </nav>
   </div>
 
-  <script is:inline define:vars={{ path }}>
-    // Locale switcher: navigate to the same page in the chosen locale.
-    const switchLocale = (select) => {
-      select?.addEventListener('change', (e) => {
-        const next = e.target.value;
-        const url = next === 'en' ? path : `/${next}${path === '/' ? '' : path}`;
-        location.href = url || '/';
-      });
-    };
-    switchLocale(document.getElementById('locale-switcher'));
-    switchLocale(document.getElementById('locale-switcher-mobile'));
-
+  <script is:inline>
     // Hamburger menu toggle (Apple.com style overlay).
     const menuButton = document.getElementById('menu-button');
     const mobileMenu = document.getElementById('mobile-menu');

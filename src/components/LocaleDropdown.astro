@@ -1,0 +1,225 @@
+---
+import { LOCALES, LOCALE_META, type Locale } from '../lib/i18n';
+import type { Translate } from '../lib/t';
+
+interface Props {
+  locale: Locale;
+  path: string;
+  tr: Translate;
+  id: string;
+  variant: 'pill' | 'full';
+  wrapperClass?: string;
+}
+
+const { locale, path, tr, id, variant, wrapperClass = '' } = Astro.props;
+const listboxId = `${id}-listbox`;
+const isPill = variant === 'pill';
+---
+
+<div class={`relative ${wrapperClass}`} data-locale-dropdown={id}>
+  {
+    !isPill && (
+      <span class="mb-2 block text-sm text-ink-2">{tr('nav.language')}</span>
+    )
+  }
+  <button
+    type="button"
+    role="combobox"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-controls={listboxId}
+    aria-label={tr('nav.language')}
+    class={
+      isPill
+        ? 'flex items-center gap-2 rounded-full border border-hairline bg-card py-2 pe-3 ps-3 text-sm text-ink transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.06]'
+        : 'flex w-full items-center justify-between rounded-2xl border border-hairline bg-card px-4 py-3 text-[16px] text-ink'
+    }
+  >
+    <span class="flex items-center gap-2">
+      <svg
+        class={isPill ? 'h-4 w-4 text-ink-2' : 'h-5 w-5 text-ink-2'}
+        viewBox="0 0 256 256"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm87.63,96H175.8a173.16,173.16,0,0,0-15.38-56.27A88.12,88.12,0,0,1,215.63,120ZM128,40c11.09,0,26.52,13.78,35.72,56.31A181.16,181.16,0,0,1,168,120H88a181.16,181.16,0,0,1,4.28-23.69C101.48,53.78,116.91,40,128,40ZM40.37,120A88.12,88.12,0,0,1,95.58,63.73,173.16,173.16,0,0,0,80.2,120Zm0,16H80.2a173.16,173.16,0,0,0,15.38,56.27A88.12,88.12,0,0,1,40.37,136ZM128,216c-11.09,0-26.52-13.78-35.72-56.31A181.16,181.16,0,0,1,88,136h80a181.16,181.16,0,0,1-4.28,23.69C154.52,202.22,139.09,216,128,216Zm22.42-23.73A173.16,173.16,0,0,0,175.8,136h39.83A88.12,88.12,0,0,1,160.42,192.27Z"
+        />
+      </svg>
+      <span>{LOCALE_META[locale].nativeLabel}</span>
+    </span>
+    <svg
+      data-chevron
+      class="h-3.5 w-3.5 text-ink-2 transition-transform duration-200"
+      viewBox="0 0 256 256"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+      />
+    </svg>
+  </button>
+  <ul
+    id={listboxId}
+    role="listbox"
+    aria-label={tr('nav.language')}
+    class={
+      isPill
+        ? 'absolute end-0 top-full z-50 mt-2 hidden w-44 origin-top overflow-hidden rounded-2xl bg-card py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)] ring-1 ring-hairline'
+        : 'absolute inset-x-0 bottom-full z-50 mb-2 hidden origin-bottom overflow-hidden rounded-2xl bg-card py-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.14)] ring-1 ring-hairline'
+    }
+  >
+    {
+      LOCALES.map((l) => (
+        <li
+          id={`${id}-opt-${l}`}
+          role="option"
+          aria-selected={l === locale ? 'true' : 'false'}
+          data-value={l}
+          class={`flex cursor-pointer items-center justify-between gap-2 px-4 text-ink transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] ${
+            isPill ? 'py-2.5 text-sm' : 'py-3 text-[16px]'
+          } ${l === locale ? 'font-semibold' : ''}`}
+        >
+          <span>{LOCALE_META[l].nativeLabel}</span>
+          {l === locale && (
+            <svg
+              class="h-4 w-4 shrink-0 text-accent"
+              viewBox="0 0 256 256"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" />
+            </svg>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  @keyframes locale-dd-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  [data-locale-dropdown] [role='listbox']:not(.hidden) {
+    animation: locale-dd-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+</style>
+
+<script is:inline define:vars={{ id, path, currentLocale: locale }}>
+  (() => {
+    const root = document.querySelector(`[data-locale-dropdown="${id}"]`);
+    if (!root) return;
+    const button = root.querySelector('[role="combobox"]');
+    const listbox = root.querySelector('[role="listbox"]');
+    const chevron = root.querySelector('[data-chevron]');
+    const options = Array.from(listbox.querySelectorAll('[role="option"]'));
+    const ACTIVE_CLS = 'dd-active';
+    let open = false;
+    let activeIndex = Math.max(
+      0,
+      options.findIndex((o) => o.getAttribute('aria-selected') === 'true'),
+    );
+    let typeBuffer = '';
+    let typeTimer = null;
+
+    // Inject a tiny style for the keyboard-active option (kept in JS so the
+    // component's scoped CSS stays static).
+    const style = document.createElement('style');
+    style.textContent = `[data-locale-dropdown="${id}"] .${ACTIVE_CLS}{background:rgba(0,113,227,.1)}`;
+    document.head.appendChild(style);
+
+    const setActive = (i) => {
+      activeIndex = (i + options.length) % options.length;
+      options.forEach((o, j) => o.classList.toggle(ACTIVE_CLS, j === activeIndex));
+      button.setAttribute('aria-activedescendant', options[activeIndex].id);
+      options[activeIndex].scrollIntoView({ block: 'nearest' });
+    };
+
+    const setOpen = (next) => {
+      open = next;
+      button.setAttribute('aria-expanded', String(next));
+      listbox.classList.toggle('hidden', !next);
+      chevron.classList.toggle('rotate-180', next);
+      if (next) {
+        setActive(activeIndex);
+      } else {
+        button.removeAttribute('aria-activedescendant');
+        options.forEach((o) => o.classList.remove(ACTIVE_CLS));
+        typeBuffer = '';
+        clearTimeout(typeTimer);
+      }
+    };
+
+    const navigate = (value) => {
+      if (value === currentLocale) return;
+      const url = value === 'en' ? path : `/${value}${path === '/' ? '' : path}`;
+      location.href = url || '/';
+    };
+
+    button.addEventListener('click', () => setOpen(!open));
+
+    options.forEach((o, i) => {
+      o.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navigate(o.dataset.value);
+      });
+      o.addEventListener('mousemove', () => {
+        if (open && i !== activeIndex) setActive(i);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (open && !root.contains(e.target)) setOpen(false);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && open) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    button.addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (k === 'ArrowDown' || k === 'Enter' || k === ' ') {
+        e.preventDefault();
+        if (!open) setOpen(true);
+        else if (k === 'ArrowDown') setActive(activeIndex + 1);
+        else navigate(options[activeIndex].dataset.value);
+      } else if (k === 'ArrowUp') {
+        e.preventDefault();
+        if (!open) setOpen(true);
+        else setActive(activeIndex - 1);
+      } else if (k === 'Home') {
+        e.preventDefault();
+        if (!open) setOpen(true);
+        setActive(0);
+      } else if (k === 'End') {
+        e.preventDefault();
+        if (!open) setOpen(true);
+        setActive(options.length - 1);
+      } else if (k === 'Tab' && open) {
+        // Close without committing — Tab must never trigger navigation.
+        setOpen(false);
+      } else if (k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (!open) setOpen(true);
+        clearTimeout(typeTimer);
+        typeBuffer += k.toLowerCase();
+        typeTimer = setTimeout(() => (typeBuffer = ''), 500);
+        const idx = options.findIndex((o) =>
+          o.textContent.trim().toLowerCase().startsWith(typeBuffer),
+        );
+        if (idx >= 0) setActive(idx);
+      }
+    });
+  })();
+</script>
