@@ -80,5 +80,10 @@
   "faq.eyebrow": "সঘনাই সোধা প্ৰশ্ন",
   "tool.yourFiles": "আপোনাৰ ফাইলসমূহ ({count})",
   "inspector.tag": "টেগ",
-  "inspector.value": "মান"
+  "inspector.value": "মান",
+  "hero.imageAlt": "স্মাৰ্টফোনৰ পৰা EXIF মেটাডাটা টেগ আঁতৰোৱা হৈ আছে",
+  "lifestyle.eyebrow": "বাস্তৱ জীৱনৰ বাবে",
+  "lifestyle.title": "মুহূৰ্তটো শ্বেয়াৰ কৰক। মেটাডাটা নহয়।",
+  "lifestyle.subtitle": "প্ৰতিটো ফটোতে লুকাই থাকে আপুনি ক'ত আছিল, কি কেমেৰাৰে তুলিছিল, কেতিয়া। শ্বেয়াৰ কৰাৰ আগতেই PureClear সকলো আঁতৰাই দিয়ে — আপোনাৰ ব্ৰাউজাৰতে।",
+  "lifestyle.imageAlt": "ৰ'দঘাই বাটত ফটো তুলি থকা ফটোগ্ৰাফাৰ"
 }

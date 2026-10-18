@@ -80,5 +80,10 @@
   "faq.eyebrow": "FAQ",
   "tool.yourFiles": "Your files ({count})",
   "inspector.tag": "Tag",
-  "inspector.value": "Value"
+  "inspector.value": "Value",
+  "hero.imageAlt": "Smartphone with EXIF metadata tags being stripped away",
+  "lifestyle.eyebrow": "Made for real life",
+  "lifestyle.title": "Share the moment. Not the metadata.",
+  "lifestyle.subtitle": "Every photo hides where you were, what you shot with, and when. PureClear strips it all — right in your browser, before you share.",
+  "lifestyle.imageAlt": "Photographer taking a photo on a sunlit street"
 }

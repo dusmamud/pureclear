@@ -80,5 +80,10 @@
   "faq.eyebrow": "Aksar puche jaane wale sawaal",
   "tool.yourFiles": "Aapki files ({count})",
   "inspector.tag": "टैग",
-  "inspector.value": "वैल्यू"
+  "inspector.value": "वैल्यू",
+  "hero.imageAlt": "Smartphone jisme se EXIF metadata tags hataye ja rahe hain",
+  "lifestyle.eyebrow": "Asli zindagi ke liye",
+  "lifestyle.title": "Pal share karo. Metadata nahi.",
+  "lifestyle.subtitle": "Har photo me chhupa hota hai aap kahan the, kis camera se liya, kab liya. Share karne se pehle PureClear sab hata deta hai — seedha aapke browser me.",
+  "lifestyle.imageAlt": "Dhoop bhari gali me photo leti photographer"
 }
