@@ -20,6 +20,8 @@
   "formats.whatRemoved": "কি কি আঁতৰোৱা হয়",
   "formats.siblings": "ইয়াৰ পৰাও মেটাডাটা আঁতৰাওক",
   "formats.faqTitle": "প্ৰশ্ন আৰু উত্তৰ",
+  "formats.indexTitle": "যিকোনো ফৰমেটৰ পৰা মেটাডাটা আঁতৰাওক — বিনামূলীয়া",
+  "formats.indexDescription": "JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV আৰু PDF ৰ পৰা EXIF আৰু লুকাই থকা মেটাডাটা আঁতৰাওক — বিনামূলীয়া, সম্পূৰ্ণ ব্ৰাউজাৰত।",
   "formats.title": "{format} ফাইলৰ পৰা মেটাডাটা আঁতৰাওক",
   "hero.badge": "100% ব্ৰাউজাৰতে · আপলোড নাই",
   "hero.ctaPrimary": "এতিয়াই ফাইল চাফা কৰক",

@@ -20,6 +20,8 @@
   "formats.whatRemoved": "What gets removed",
   "formats.siblings": "Also strip metadata from",
   "formats.faqTitle": "Questions, answered",
+  "formats.indexTitle": "Remove Metadata from Any Format — Free & Private",
+  "formats.indexDescription": "Strip EXIF and hidden metadata from JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV and PDF — free, lossless, 100% in-browser.",
   "formats.title": "Remove metadata from {format} files",
   "hero.badge": "100% in-browser · No uploads",
   "hero.ctaPrimary": "Clean files now",

@@ -20,6 +20,8 @@
   "formats.whatRemoved": "Kya kya hataya jaata hai",
   "formats.siblings": "Inse bhi metadata hatayein",
   "formats.faqTitle": "Sawal, jawab sahit",
+  "formats.indexTitle": "Kisi Bhi Format se Metadata Hatayein — Free aur Private",
+  "formats.indexDescription": "JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV aur PDF se EXIF aur chhupa metadata hatayein — free, lossless, 100% browser me.",
   "formats.title": "{format} files se metadata hatayein",
   "hero.badge": "100% browser me · Koi upload nahi",
   "hero.ctaPrimary": "Abhi files saaf karein",
