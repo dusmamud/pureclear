@@ -25,7 +25,7 @@
  * Until set, the forms show a "not available yet" note instead of submitting.
  */
 
-export const REPORT_API_BASE = "";
+export const REPORT_API_BASE = "https://pureclear-reports.beingdusmamud.workers.dev";
 
 export const APP_VERSION = "1.0.0";
 
