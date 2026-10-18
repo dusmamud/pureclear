@@ -1,0 +1,54 @@
+---
+import { FORMATS } from '../data/formats';
+import { t } from '../lib/t';
+import { localePath, type Locale } from '../lib/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const tr = t(locale);
+---
+
+{/* Formats grid — Apple style section, links to all 9 dedicated format pages */}
+<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+  <div class="text-center">
+    <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+      {tr('formats.gridEyebrow')}
+    </p>
+    <h2
+      class="mx-auto mt-3 max-w-2xl text-[clamp(1.75rem,4vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.02em]"
+    >
+      {tr('formats.gridTitle')}
+    </h2>
+    <p class="mx-auto mt-4 max-w-xl text-[17px] leading-relaxed text-ink-2">
+      {tr('formats.gridSub')}
+    </p>
+  </div>
+  <div class="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:mt-12 sm:grid-cols-3 sm:gap-4">
+    {
+      FORMATS.map((f) => (
+        <a
+          href={localePath(locale, `/formats/${f.slug}`)}
+          class="group rounded-[20px] bg-card p-6 ring-1 ring-hairline transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] sm:p-7"
+        >
+          <p class="text-[22px] font-semibold tracking-[-0.02em] sm:text-[26px]">
+            {f.name}
+          </p>
+          <p class="mt-1.5 text-[14px] leading-snug text-ink-2">{f.tagline[locale]}</p>
+          <span class="mt-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:bg-accent group-hover:text-white">
+            <svg
+              class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-px"
+              viewBox="0 0 256 256"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z" />
+            </svg>
+          </span>
+        </a>
+      ))
+    }
+  </div>
+</section>

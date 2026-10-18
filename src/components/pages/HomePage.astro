@@ -1,6 +1,7 @@
 ---
 import Hero from '../Hero.astro';
 import Bento from '../Bento.astro';
+import FormatsGrid from '../FormatsGrid.astro';
 import LifestyleBand from '../LifestyleBand.astro';
 import Faq from '../Faq.astro';
 import type { Locale } from '../../lib/i18n';
@@ -37,6 +38,7 @@ const jsonLd = {
   />
 </div>
 <Bento tr={tr} />
+<FormatsGrid locale={locale} />
 <LifestyleBand tr={tr} />
 <Faq tr={tr} />
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
