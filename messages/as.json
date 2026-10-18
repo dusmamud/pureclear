@@ -78,5 +78,6 @@
   "features.c4b": "প্ৰতিটো ফাইল cleaningৰ পিছত পুনৰ scan কৰা হয়। Zero tags remaining — দেখুওৱা হয়, মাথোঁ দাবী নহয়।",
   "how.eyebrow": "কেনেকৈ কাম কৰে",
   "how.subtitle": "চাৰিটা step। Zero uploads। আপোনাৰ ফাইল এই tab কেতিয়াও নেৰে।",
-  "faq.eyebrow": "সঘনাই সোধা প্ৰশ্ন"
+  "faq.eyebrow": "সঘনাই সোধা প্ৰশ্ন",
+  "tool.yourFiles": "আপোনাৰ ফাইলসমূহ ({count})"
 }

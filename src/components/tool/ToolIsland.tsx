@@ -257,28 +257,29 @@ export default function ToolIsland({ locale, messages }: Props) {
   const doneCount = files.filter((f) => f.status === "done").length;
 
   return (
-    <div className="overflow-hidden rounded-card border border-hairline bg-card shadow-card">
-      {/* Dropzone — Apple style: generous, calm, inviting */}
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label={msg("tool.dropTitle")}
-        onClick={() => inputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
-        className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:py-16 ${
-          dragOver
-            ? "scale-[1.01] bg-accent/[0.08]"
-            : "hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
-        }`}
-      >
+    <div className="contents">
+      {/* Dropzone — standalone card (Apple style: generous, calm, inviting) */}
+      <div className="overflow-hidden rounded-card border border-hairline bg-card shadow-card">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={msg("tool.dropTitle")}
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={onDrop}
+          className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:py-16 ${
+            dragOver
+              ? "scale-[1.01] bg-accent/[0.08]"
+              : "hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
+          }`}
+        >
         <span
           className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             dragOver ? "scale-110" : ""
@@ -305,11 +306,28 @@ export default function ToolIsland({ locale, messages }: Props) {
           }}
         />
       </div>
+      </div>
 
       {files.length > 0 && (
-        <div className="border-t border-hairline">
+        <section
+          aria-label={msg("tool.yourFiles", { count: files.length })}
+          className="mt-4 animate-[rise-in_0.5s_cubic-bezier(0.16,1,0.3,1)] overflow-hidden rounded-card border border-hairline bg-card shadow-card sm:mt-5"
+        >
           <div aria-live="polite" className="sr-only">
             {files.map((f) => `${f.file.name}: ${f.status}`).join(". ")}
+          </div>
+          <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3 sm:px-6">
+            <h2 className="text-[15px] font-semibold tracking-[-0.01em]">
+              {msg("tool.yourFiles", { count: files.length })}
+            </h2>
+            <button
+              type="button"
+              onClick={reset}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+            >
+              <ArrowCounterClockwise size={16} aria-hidden="true" />
+              {msg("tool.reset")}
+            </button>
           </div>
           <ul className="divide-y divide-hairline">
             {files.map((f) => (
@@ -322,27 +340,19 @@ export default function ToolIsland({ locale, messages }: Props) {
               />
             ))}
           </ul>
-          <div className="flex flex-wrap items-center gap-3 border-t border-hairline bg-canvas/60 px-4 py-4 sm:px-6">
-            {doneCount > 1 && (
+          {doneCount > 1 && (
+            <div className="border-t border-hairline bg-canvas/60 px-4 py-4 sm:px-6">
               <button
                 type="button"
                 onClick={downloadAll}
-                className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto sm:justify-start"
               >
                 <FileArchive size={18} aria-hidden="true" />
                 {msg("tool.downloadAll")}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-2 rounded-pill border border-hairline px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-black/5 active:scale-[0.97] dark:hover:bg-white/10"
-            >
-              <ArrowCounterClockwise size={18} aria-hidden="true" />
-              {msg("tool.reset")}
-            </button>
-          </div>
-        </div>
+            </div>
+          )}
+        </section>
       )}
     </div>
   );
@@ -452,7 +462,7 @@ function FileRow({
             <button
               type="button"
               onClick={onStrip}
-              className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
             >
               <Trash size={16} aria-hidden="true" />
               {msg("tool.remove")}
@@ -462,7 +472,7 @@ function FileRow({
           <button
             type="button"
             onClick={onDownload}
-            className="inline-flex items-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
           >
             <DownloadSimple size={16} aria-hidden="true" />
             {msg("tool.download")}

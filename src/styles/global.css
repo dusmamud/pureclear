@@ -71,6 +71,18 @@ body {
   border-radius: 4px;
 }
 
+/* Entrance for the file-list card: gentle rise with Apple's ease curve */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

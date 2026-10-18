@@ -78,5 +78,6 @@
   "features.c4b": "Har file cleaning ke baad dobara scan hoti hai. Zero tags remaining — dikhaya jata hai, sirf daava nahi.",
   "how.eyebrow": "Kaise kaam karta hai",
   "how.subtitle": "Chaar steps. Zero uploads. Aapki files is tab ko kabhi nahi chhodti.",
-  "faq.eyebrow": "Aksar puche jaane wale sawaal"
+  "faq.eyebrow": "Aksar puche jaane wale sawaal",
+  "tool.yourFiles": "Aapki files ({count})"
 }

@@ -78,5 +78,6 @@
   "features.c4b": "Every file is re-scanned after cleaning. Zero tags remaining — shown, not claimed.",
   "how.eyebrow": "How it works",
   "how.subtitle": "Four steps. Zero uploads. Your files never leave this tab.",
-  "faq.eyebrow": "FAQ"
+  "faq.eyebrow": "FAQ",
+  "tool.yourFiles": "Your files ({count})"
 }
