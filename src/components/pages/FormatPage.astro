@@ -166,7 +166,17 @@ const faqJsonLd = {
           href={localePath(locale, `/formats/${s.slug}`)}
           class="group rounded-2xl bg-card p-5 ring-1 ring-hairline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]"
         >
-          <p class="text-[15px] font-semibold tracking-[-0.01em]">{s.name}</p>
+          <div class="flex items-start justify-between gap-2">
+            <p class="text-[15px] font-semibold tracking-[-0.01em]">{s.name}</p>
+            <svg
+              viewBox="0 0 256 256"
+              fill="currentColor"
+              aria-hidden="true"
+              class="h-7 w-7 shrink-0 text-ink-2/60 transition-colors duration-300 group-hover:text-ink-2"
+            >
+              <path d={s.icon} />
+            </svg>
+          </div>
           <p class="mt-1 text-[13px] leading-snug text-ink-2">{s.tagline[locale]}</p>
           <span class="mt-3 inline-flex items-center gap-1 text-[13px] font-semibold text-accent">
             <span aria-hidden="true" class="transition-transform duration-300 group-hover:translate-x-0.5">→</span>
