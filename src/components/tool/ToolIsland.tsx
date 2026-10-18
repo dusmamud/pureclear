@@ -370,149 +370,161 @@ function FileRow({
   onDownload: () => void;
 }) {
   return (
-    <li className="flex flex-col gap-4 px-4 py-5 sm:flex-row sm:items-center sm:px-6">
-      {f.thumbUrl ? (
-        <img
-          src={f.thumbUrl}
-          alt=""
-          className="h-16 w-16 shrink-0 rounded-2xl border border-hairline object-cover"
-        />
-      ) : (
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-hairline bg-canvas text-sm font-semibold tracking-wide text-ink-2">
-          {f.ext.slice(0, 4).toUpperCase()}
-        </span>
-      )}
-
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{f.file.name}</p>
-        <p className="mt-0.5 text-xs text-ink-2">
-          {formatSize(f.file.size)}
-          {f.sizeWarn && (
-            <span className="ms-2 inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
-              <WarningCircle size={14} aria-hidden="true" />
-              {msg("tool.fileTooBig", { size: "100 MB" })}
-            </span>
-          )}
-        </p>
-
-        {f.status === "reading" && (
-          <p className="mt-1.5 flex items-center gap-2 text-xs text-ink-2">
-            <SpinnerGap size={14} className="animate-spin" aria-hidden="true" />
-            {msg("tool.processing")}
-          </p>
+    <li className="px-4 py-5 sm:px-6">
+      {/* Header row: thumbnail + file info + actions */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        {f.thumbUrl ? (
+          <img
+            src={f.thumbUrl}
+            alt=""
+            className="h-16 w-16 shrink-0 rounded-2xl border border-hairline object-cover"
+          />
+        ) : (
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-hairline bg-canvas text-sm font-semibold tracking-wide text-ink-2">
+            {f.ext.slice(0, 4).toUpperCase()}
+          </span>
         )}
 
-        {f.status === "ready" && (
-          <div className="mt-2">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <p className="text-[13px] font-medium text-ink-2">
-                {msg("tool.tagsFound", { count: f.tags.length })}
-              </p>
-              {f.hasGps && (
-                <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
-                  <WarningCircle size={14} aria-hidden="true" />
-                  {msg("tool.gpsWarning")}
-                </p>
-              )}
-            </div>
-            {f.tags.length > 0 && (
-              <div className="mt-2.5 overflow-hidden rounded-xl border border-hairline">
-                <div className="max-h-56 overflow-auto">
-                  <table className="w-full text-[13px]">
-                    <thead className="sticky top-0 z-10">
-                      <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
-                        <th
-                          scope="col"
-                          className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
-                        >
-                          {msg("inspector.tag")}
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
-                        >
-                          {msg("inspector.value")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-hairline">
-                      {f.tags.slice(0, 100).map((tag, i) => (
-                        <tr
-                          key={i}
-                          className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
-                        >
-                          <td className="px-3 py-[7px] align-top">
-                            <span className="block font-medium leading-snug text-ink">
-                              {tag.name}
-                            </span>
-                            <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
-                              {tag.group}
-                            </span>
-                          </td>
-                          <td className="max-w-0 px-3 py-[7px] align-top">
-                            <span
-                              className="block truncate font-mono text-[12px] leading-snug text-ink-2"
-                              title={tag.value}
-                            >
-                              {tag.value}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{f.file.name}</p>
+          <p className="mt-0.5 text-xs text-ink-2">
+            {formatSize(f.file.size)}
+            {f.sizeWarn && (
+              <span className="ms-2 inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <WarningCircle size={14} aria-hidden="true" />
+                {msg("tool.fileTooBig", { size: "100 MB" })}
+              </span>
             )}
-          </div>
-        )}
-
-        {f.status === "stripping" && (
-          <p className="mt-1.5 flex items-center gap-2 text-xs text-ink-2">
-            <SpinnerGap size={14} className="animate-spin" aria-hidden="true" />
-            {msg("tool.removing")}
           </p>
-        )}
 
-        {f.status === "done" && (
-          <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
-            <CheckCircle size={16} weight="fill" aria-hidden="true" />
-            {msg("tool.tagsRemoved", { count: f.removedCount })} ·{" "}
-            {msg("tool.tagsRemaining", { count: f.remaining.length })}
-          </p>
-        )}
+          {f.status === "reading" && (
+            <p className="mt-1.5 flex items-center gap-2 text-xs text-ink-2">
+              <SpinnerGap
+                size={14}
+                className="animate-spin"
+                aria-hidden="true"
+              />
+              {msg("tool.processing")}
+            </p>
+          )}
 
-        {f.status === "error" && (
-          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
-            <WarningCircle size={14} aria-hidden="true" />
-            {msg(f.errorKey ?? "tool.error")}
-          </p>
-        )}
-      </div>
+          {f.status === "stripping" && (
+            <p className="mt-1.5 flex items-center gap-2 text-xs text-ink-2">
+              <SpinnerGap
+                size={14}
+                className="animate-spin"
+                aria-hidden="true"
+              />
+              {msg("tool.removing")}
+            </p>
+          )}
 
-      <div className="flex shrink-0 gap-2">
-        {(f.status === "ready" || f.status === "error") &&
-          f.status === "ready" && (
+          {f.status === "done" && (
+            <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
+              <CheckCircle size={16} weight="fill" aria-hidden="true" />
+              {msg("tool.tagsRemoved", { count: f.removedCount })} ·{" "}
+              {msg("tool.tagsRemaining", { count: f.remaining.length })}
+            </p>
+          )}
+
+          {f.status === "error" && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
+              <WarningCircle size={14} aria-hidden="true" />
+              {msg(f.errorKey ?? "tool.error")}
+            </p>
+          )}
+        </div>
+
+        <div className="flex shrink-0 gap-2">
+          {(f.status === "ready" || f.status === "error") &&
+            f.status === "ready" && (
+              <button
+                type="button"
+                onClick={onStrip}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+              >
+                <Trash size={16} aria-hidden="true" />
+                {msg("tool.remove")}
+              </button>
+            )}
+          {f.status === "done" && (
             <button
               type="button"
-              onClick={onStrip}
+              onClick={onDownload}
               className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
             >
-              <Trash size={16} aria-hidden="true" />
-              {msg("tool.remove")}
+              <DownloadSimple size={16} aria-hidden="true" />
+              {msg("tool.download")}
             </button>
           )}
-        {f.status === "done" && (
-          <button
-            type="button"
-            onClick={onDownload}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
-          >
-            <DownloadSimple size={16} aria-hidden="true" />
-            {msg("tool.download")}
-          </button>
-        )}
+        </div>
       </div>
+
+      {/* Tags section — own card below the file header row */}
+      {f.status === "ready" && (
+        <div className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1">
+            <p className="text-[13px] font-semibold text-ink">
+              {msg("tool.tagsFound", { count: f.tags.length })}
+            </p>
+            {f.hasGps && (
+              <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                <WarningCircle size={14} aria-hidden="true" />
+                {msg("tool.gpsWarning")}
+              </p>
+            )}
+          </div>
+          {f.tags.length > 0 && (
+            <div className="mt-3 overflow-hidden rounded-xl border border-hairline bg-card">
+              <div className="max-h-56 overflow-auto">
+                <table className="w-full text-[13px]">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
+                      <th
+                        scope="col"
+                        className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                      >
+                        {msg("inspector.tag")}
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                      >
+                        {msg("inspector.value")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-hairline">
+                    {f.tags.slice(0, 100).map((tag, i) => (
+                      <tr
+                        key={i}
+                        className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
+                      >
+                        <td className="px-3 py-[7px] align-top">
+                          <span className="block font-medium leading-snug text-ink">
+                            {tag.name}
+                          </span>
+                          <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
+                            {tag.group}
+                          </span>
+                        </td>
+                        <td className="max-w-0 px-3 py-[7px] align-top">
+                          <span
+                            className="block truncate text-[13px] leading-snug text-ink-2"
+                            title={tag.value}
+                          >
+                            {tag.value}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </li>
   );
 }
