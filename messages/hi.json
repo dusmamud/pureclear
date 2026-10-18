@@ -112,7 +112,7 @@
   "about.ctaButton": "Saaf karna shuru karo",
   "privacy.eyebrow": "Privacy",
   "privacy.intro": "PureClear aise design kiya gaya hai ki collect karne ko kuch hai hi nahi, store karne ko kuch nahi, breach hone ko kuch nahi. Yahan exactly likha hai kya hota hai — aur kya nahi.",
-  "privacy.imageAlt": "Privacy shield ke neeche haath me photo, jisme se chhupa data ghul raha hai",
+  "privacy.imageAlt": "Lock wali privacy shield se surakshit smartphone",
   "privacy.s1t": "Aapki files browser se bahar nahi jaati",
   "privacy.s1b": "Jab aap PureClear me file drop karte ho, woh poori tarah aapke device par read aur process hoti hai — browser tab me locally chalne wale WebAssembly se. Koi file, thumbnail ya metadata kisi server ko nahi bheja jaata — hamare ya kisi aur ke. Khud verify kar sakte ho: page load hone ke baad internet disconnect kar do, sab kuch phir bhi kaam karega.",
   "privacy.s2t": "No accounts, kabhi nahi",

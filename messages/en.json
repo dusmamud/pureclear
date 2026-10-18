@@ -112,7 +112,7 @@
   "about.ctaButton": "Start cleaning",
   "privacy.eyebrow": "Privacy",
   "privacy.intro": "PureClear is designed so there is nothing to collect, nothing to store, and nothing to breach. Here's exactly what happens — and what doesn't — when you use it.",
-  "privacy.imageAlt": "A hand holding a photo with its hidden data dissolving away under a privacy shield",
+  "privacy.imageAlt": "Smartphone protected by a glowing privacy shield with a lock",
   "privacy.s1t": "Your files never leave your browser",
   "privacy.s1b": "When you drop a file into PureClear, it is read and processed entirely on your device, using WebAssembly running locally in your browser tab. No file, thumbnail or metadata is transmitted to any server — ours or anyone else's. You can verify this yourself: disconnect from the internet after the page loads, and everything still works.",
   "privacy.s2t": "No accounts, ever",
