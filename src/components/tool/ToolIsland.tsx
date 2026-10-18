@@ -280,32 +280,32 @@ export default function ToolIsland({ locale, messages }: Props) {
               : "hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
           }`}
         >
-        <span
-          className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            dragOver ? "scale-110" : ""
-          }`}
-        >
-          <CloudArrowUp size={30} weight="duotone" aria-hidden="true" />
-        </span>
-        <div>
-          <p className="text-[21px] font-semibold tracking-[-0.01em]">
-            {msg("tool.dropTitle")}
-          </p>
-          <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-ink-2">
-            {msg("tool.dropSubtitle")}
-          </p>
+          <span
+            className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              dragOver ? "scale-110" : ""
+            }`}
+          >
+            <CloudArrowUp size={30} weight="duotone" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-[21px] font-semibold tracking-[-0.01em]">
+              {msg("tool.dropTitle")}
+            </p>
+            <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-ink-2">
+              {msg("tool.dropSubtitle")}
+            </p>
+          </div>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            className="sr-only"
+            onChange={(e) => {
+              if (e.target.files?.length) addFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
         </div>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          className="sr-only"
-          onChange={(e) => {
-            if (e.target.files?.length) addFiles(e.target.files);
-            e.target.value = "";
-          }}
-        />
-      </div>
       </div>
 
       {files.length > 0 && (
