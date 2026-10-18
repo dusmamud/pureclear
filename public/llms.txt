@@ -5,7 +5,7 @@
 PureClear removes hidden metadata (EXIF, GPS location, XMP, document properties) from
 photos, videos and PDFs entirely in the user's browser. No files are uploaded to any server.
 
-- Site: https://pureclear.app
+- Site: https://pureclear.dusrel.com
 - Formats: JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV, PDF
 - Engine: ExifTool (WASM) in a Web Worker for images/video; pdf-lib for PDFs
 - Locales: English (/), Hindi (/hi), Assamese (/as)

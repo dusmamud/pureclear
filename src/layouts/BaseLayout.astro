@@ -16,7 +16,7 @@ interface Props {
 const { locale, title, description, path, ogImage = '/og/default.png' } = Astro.props;
 const tr = t(locale);
 const dir = LOCALE_META[locale].dir;
-const canonical = `https://pureclear.app${localePath(locale, path)}`;
+const canonical = `https://pureclear.dusrel.com${localePath(locale, path)}`;
 ---
 
 <!doctype html>
@@ -27,20 +27,20 @@ const canonical = `https://pureclear.app${localePath(locale, path)}`;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="en" href={`https://pureclear.app${path}`} />
-    <link rel="alternate" hreflang="hi" href={`https://pureclear.app/hi${path}`} />
-    <link rel="alternate" hreflang="as" href={`https://pureclear.app/as${path}`} />
-    <link rel="alternate" hreflang="x-default" href={`https://pureclear.app${path}`} />
+    <link rel="alternate" hreflang="en" href={`https://pureclear.dusrel.com${path}`} />
+    <link rel="alternate" hreflang="hi" href={`https://pureclear.dusrel.com/hi${path}`} />
+    <link rel="alternate" hreflang="as" href={`https://pureclear.dusrel.com/as${path}`} />
+    <link rel="alternate" hreflang="x-default" href={`https://pureclear.dusrel.com${path}`} />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={`https://pureclear.app${ogImage}`} />
+    <meta property="og:image" content={`https://pureclear.dusrel.com${ogImage}`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={`https://pureclear.app${ogImage}`} />
+    <meta name="twitter:image" content={`https://pureclear.dusrel.com${ogImage}`} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />

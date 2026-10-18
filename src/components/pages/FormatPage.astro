@@ -17,7 +17,7 @@ if (!info) throw new Error(`Unknown format: ${format}`);
 const upper = info.name;
 const messages = getRawMessages(locale);
 const siblings = FORMATS.filter((f) => f.slug !== info.slug);
-const pageUrl = `https://pureclear.app${localePath(locale, `/formats/${info.slug}`)}`;
+const pageUrl = `https://pureclear.dusrel.com${localePath(locale, `/formats/${info.slug}`)}`;
 
 const webAppJsonLd = {
   '@context': 'https://schema.org',
@@ -37,13 +37,13 @@ const breadcrumbJsonLd = {
       '@type': 'ListItem',
       position: 1,
       name: 'PureClear',
-      item: `https://pureclear.app${localePath(locale, '/')}`,
+      item: `https://pureclear.dusrel.com${localePath(locale, '/')}`,
     },
     {
       '@type': 'ListItem',
       position: 2,
       name: tr('formats.gridEyebrow'),
-      item: `https://pureclear.app${localePath(locale, '/formats/jpg')}`,
+      item: `https://pureclear.dusrel.com${localePath(locale, '/formats/jpg')}`,
     },
     { '@type': 'ListItem', position: 3, name: upper, item: pageUrl },
   ],

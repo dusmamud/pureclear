@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  site: "https://pureclear.app",
+  site: "https://pureclear.dusrel.com",
   output: "static",
   i18n: {
     locales: ["en", "hi", "as"],

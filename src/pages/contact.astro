@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactPage from '../components/pages/ContactPage.astro';
+import { t } from '../lib/t';
+
+const locale = 'en' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('contact.title')} — PureClear`}
+  description={tr('contact.intro')}
+  path="/contact"
+>
+  <ContactPage locale={locale} tr={tr} />
+</BaseLayout>

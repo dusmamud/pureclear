@@ -14,4 +14,4 @@ Allow: /
 User-agent: PerplexityBot
 Allow: /
 
-Sitemap: https://pureclear.app/sitemap-index.xml
+Sitemap: https://pureclear.dusrel.com/sitemap-index.xml

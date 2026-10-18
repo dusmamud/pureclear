@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TermsPage from '../../components/pages/TermsPage.astro';
+import { t } from '../../lib/t';
+
+const locale = 'hi' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('terms.title')} — PureClear`}
+  description={tr('terms.intro')}
+  path="/terms"
+>
+  <TermsPage locale={locale} tr={tr} />
+</BaseLayout>
