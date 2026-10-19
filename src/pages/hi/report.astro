@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ReportPage from '../../components/pages/ReportPage.astro';
+import { t } from '../../lib/t';
+
+const locale = 'hi' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('report.title')} — PureClear`}
+  description={tr('report.intro')}
+  path="/report"
+>
+  <ReportPage tr={tr} />
+</BaseLayout>

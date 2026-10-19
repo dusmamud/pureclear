@@ -376,8 +376,8 @@ function FileRow({
   // Privacy-first report link: only the sanitized reason, extension and
   // byte size travel in the URL — never the file name.
   const reportUrl =
-    localePath(locale, "/contact") +
-    "?report=1&reason=" +
+    localePath(locale, "/report") +
+    "?reason=" +
     encodeURIComponent(f.errorKey ?? "tool.error") +
     "&ext=" +
     encodeURIComponent(f.ext) +

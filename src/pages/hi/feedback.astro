@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FeedbackPage from '../../components/pages/FeedbackPage.astro';
+import { t } from '../../lib/t';
+
+const locale = 'hi' as const;
+const tr = t(locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${tr('feedback.title')} — PureClear`}
+  description={tr('feedback.intro')}
+  path="/feedback"
+>
+  <FeedbackPage tr={tr} />
+</BaseLayout>

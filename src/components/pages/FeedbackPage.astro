@@ -1,0 +1,32 @@
+---
+import FeedbackForm from '../FeedbackForm.astro';
+import type { Translate } from '../../lib/t';
+
+interface Props {
+  tr: Translate;
+}
+
+const { tr } = Astro.props;
+---
+
+{/* Header */}
+<section class="mx-auto max-w-6xl px-4 pb-10 pt-16 text-center sm:px-6 sm:pt-24">
+  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+    {tr('feedback.eyebrow')}
+  </p>
+  <h1
+    class="mx-auto mt-4 max-w-4xl text-[clamp(2rem,5vw,3.25rem)] font-semibold leading-[1.08] tracking-[-0.025em]"
+  >
+    {tr('feedback.title')}
+  </h1>
+  <p
+    class="mx-auto mt-5 max-w-2xl text-[clamp(1rem,2vw,1.1875rem)] leading-[1.55] text-ink-2"
+  >
+    {tr('feedback.intro')}
+  </p>
+</section>
+
+{/* Form */}
+<section class="mx-auto max-w-2xl px-4 pb-20 sm:px-6 sm:pb-28">
+  <FeedbackForm tr={tr} />
+</section>
