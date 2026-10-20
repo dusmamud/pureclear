@@ -54,6 +54,22 @@ export function parseExifToolText(text: string): Tag[] {
 }
 
 const api = {
+  /**
+   * Boot the WASM engine (download + Perl init) without reading a real
+   * file, so the first real read doesn't pay the cold-start cost.
+   * Mirrors the reference implementation's `-ver` warmup call.
+   */
+  async warmup(): Promise<void> {
+    try {
+      await parseMetadata(
+        { name: "warmup.txt", data: new Uint8Array(0) },
+        { args: ["-ver"], fetch: wasmFetch },
+      );
+    } catch {
+      /* warmup is best-effort */
+    }
+  },
+
   /** Read metadata tags from a file. Returns display-ready tags. */
   async read(buffer: ArrayBuffer, filename: string): Promise<Tag[]> {
     const result = await parseMetadata(
@@ -70,19 +86,28 @@ const api = {
   /**
    * Strip all metadata losslessly, then verify by re-reading.
    * Returns the cleaned bytes plus before/after tag counts.
+   * When `knownCount` is provided (the caller already holds an
+   * authoritative read of this exact file), the internal before-read
+   * is skipped — saving one full ExifTool pass per strip.
    */
   async strip(
     buffer: ArrayBuffer,
     filename: string,
+    knownCount?: number,
   ): Promise<{ data: ArrayBuffer; removedCount: number; remaining: Tag[] }> {
     const file = { name: filename, data: new Uint8Array(buffer) };
 
-    const before = await parseMetadata(file, {
-      args: READ_ARGS,
-      fetch: wasmFetch,
-    });
-    const beforeTags =
-      before.success && before.data ? parseExifToolText(before.data) : [];
+    let beforeCount = knownCount;
+    if (beforeCount === undefined) {
+      const before = await parseMetadata(file, {
+        args: READ_ARGS,
+        fetch: wasmFetch,
+      });
+      beforeCount =
+        before.success && before.data
+          ? parseExifToolText(before.data).length
+          : 0;
+    }
 
     const stripped = await writeMetadata(
       file,
@@ -111,7 +136,7 @@ const api = {
 
     return {
       data: cleanedBuffer,
-      removedCount: Math.max(0, beforeTags.length - remaining.length),
+      removedCount: Math.max(0, beforeCount - remaining.length),
       remaining,
     };
   },

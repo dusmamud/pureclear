@@ -69,8 +69,25 @@ export function readTags(
 export function stripFile(
   buffer: ArrayBuffer,
   filename: string,
+  knownCount?: number,
 ): Promise<{ data: ArrayBuffer; removedCount: number; remaining: Tag[] }> {
-  return withRecovery((a) => a.strip(buffer, filename));
+  return withRecovery((a) => a.strip(buffer, filename, knownCount));
+}
+
+/**
+ * Start loading + booting the WASM engine ahead of first use (file
+ * drag-over / dropzone hover). Fire-and-forget: a failed warmup is
+ * harmless because the first real call retries through withRecovery.
+ */
+export function warmupEngine(): void {
+  void (async () => {
+    try {
+      const a = await getApi();
+      await a.warmup();
+    } catch {
+      /* warmup is best-effort */
+    }
+  })();
 }
 
 /** Free the worker (e.g. on page hide). Next use recreates it lazily. */

@@ -9,7 +9,13 @@ import {
   CheckCircle,
   SpinnerGap,
 } from "@phosphor-icons/react";
-import { readTags, stripFile, disposeEngine, type Tag } from "../../lib/engine";
+import {
+  readTags,
+  stripFile,
+  disposeEngine,
+  warmupEngine,
+  type Tag,
+} from "../../lib/engine";
 import { prereadTags } from "../../lib/exifr-preread";
 import { stripPdfMetadata } from "../../lib/pdf";
 import { zipFiles, downloadBlob } from "../../lib/zip";
@@ -38,6 +44,11 @@ export interface FileState {
   ext: string;
   status: "reading" | "ready" | "stripping" | "done" | "error";
   tags: Tag[];
+  /** True while the authoritative ExifTool read is still running behind
+   *  an instant exifr preview — tags are visible, count may still grow. */
+  verifying: boolean;
+  /** True once tags come from the authoritative ExifTool read. */
+  authoritative: boolean;
   hasGps: boolean;
   cleaned?: ArrayBuffer;
   cleanedName: string;
@@ -89,7 +100,15 @@ export default function ToolIsland({ locale, messages }: Props) {
   useEffect(() => {
     const onHide = () => disposeEngine();
     document.addEventListener("visibilitychange", onHide);
-    return () => document.removeEventListener("visibilitychange", onHide);
+    // Warm the WASM engine on the first drag-over anywhere on the page —
+    // the user is about to drop a file, so the cold-start cost is paid
+    // before the read begins instead of during it.
+    const onDrag = () => warmupEngine();
+    window.addEventListener("dragover", onDrag, { once: true });
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("dragover", onDrag);
+    };
   }, []);
 
   const patch = useCallback((id: string, p: Partial<FileState>) => {
@@ -98,6 +117,7 @@ export default function ToolIsland({ locale, messages }: Props) {
 
   const readOne = useCallback(
     async (state: FileState) => {
+      let previewShown = false;
       try {
         const buf = (await state.file.arrayBuffer()).slice(0) as ArrayBuffer;
         let tags: Tag[];
@@ -107,27 +127,58 @@ export default function ToolIsland({ locale, messages }: Props) {
           const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
           const info = (doc as any).getTitle ? await readPdfInfo(doc) : [];
           tags = info;
-        } else {
-          // Instant pre-read via exifr (no WASM cold-start) so the inspector
-          // shows tags immediately; the authoritative ExifTool read replaces
-          // these below. Best-effort — a failed pre-read never blocks.
-          try {
-            const preview = await prereadTags(buf);
-            if (preview.length > 0) {
-              patch(state.id, { tags: preview, hasGps: hasGpsTag(preview) });
-            }
-          } catch {
-            /* pre-read is best-effort */
-          }
-          tags = await readTags(buf, state.file.name);
+          patch(state.id, {
+            status: "ready",
+            tags,
+            hasGps: hasGpsTag(tags),
+            authoritative: true,
+          });
+          return;
         }
-        patch(state.id, {
-          status: "ready",
-          tags,
-          hasGps: hasGpsTag(tags),
-        });
+        // Instant pre-read via exifr (no WASM cold-start): as soon as it
+        // lands, the file flips to "ready" and the inspector renders —
+        // the user sees tags in milliseconds instead of waiting for the
+        // 24 MB WASM engine. The authoritative ExifTool read keeps
+        // running and silently replaces the preview when it lands.
+        try {
+          const preview = await prereadTags(buf);
+          if (preview.length > 0) {
+            previewShown = true;
+            patch(state.id, {
+              status: "ready",
+              tags: preview,
+              hasGps: hasGpsTag(preview),
+              verifying: true,
+            });
+          }
+        } catch {
+          /* pre-read is best-effort */
+        }
+        tags = await readTags(buf, state.file.name);
+        // Guarded: never resurrect a file the user already stripped.
+        setFiles((fs) =>
+          fs.map((f) =>
+            f.id === state.id &&
+            (f.status === "reading" || f.status === "ready")
+              ? {
+                  ...f,
+                  status: "ready" as const,
+                  tags,
+                  hasGps: hasGpsTag(tags),
+                  verifying: false,
+                  authoritative: true,
+                }
+              : f,
+          ),
+        );
       } catch {
-        patch(state.id, { status: "error", errorKey: "tool.error" });
+        if (previewShown) {
+          // Preview is on screen; the strip path re-reads inside the
+          // worker anyway, so a failed background read is not fatal.
+          patch(state.id, { verifying: false });
+        } else {
+          patch(state.id, { status: "error", errorKey: "tool.error" });
+        }
       }
     },
     [patch],
@@ -144,6 +195,8 @@ export default function ToolIsland({ locale, messages }: Props) {
           ext,
           status: isSupported(file.name) ? "reading" : "error",
           tags: [],
+          verifying: false,
+          authoritative: false,
           hasGps: false,
           cleanedName: file.name.replace(/(\.[^.]+)?$/, ".clean$1"),
           removedCount: 0,
@@ -200,9 +253,13 @@ export default function ToolIsland({ locale, messages }: Props) {
             remaining: [],
           });
         } else {
+          // When the authoritative read already counted this file's tags,
+          // the worker skips its own before-read — one full ExifTool pass
+          // saved on every strip.
           const { data, removedCount, remaining } = await stripFile(
             buf,
             st.file.name,
+            st.authoritative ? st.tags.length : undefined,
           );
           patch(st.id, {
             status: "done",
@@ -273,6 +330,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             e.preventDefault();
             setDragOver(true);
           }}
+          onPointerEnter={() => warmupEngine()}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
           className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:py-16 ${
@@ -489,6 +547,16 @@ function FileRow({
             <p className="text-[13px] font-semibold text-ink">
               {msg("tool.tagsFound", { count: f.tags.length })}
             </p>
+            {f.verifying && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-ink-2">
+                <SpinnerGap
+                  size={12}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+                {msg("tool.processing")}
+              </span>
+            )}
             {f.hasGps && (
               <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
                 <WarningCircle size={14} aria-hidden="true" />
