@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>PureClear</ShortName>
+  <Description>Remove EXIF and metadata from photos, videos and PDFs — 100% in-browser, free.</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image width="16" height="16" type="image/x-icon">https://pureclear.dusrel.com/favicon.ico</Image>
+  <Image width="96" height="96" type="image/png">https://pureclear.dusrel.com/favicon-96x96.png</Image>
+  <Url type="text/html" template="https://pureclear.dusrel.com/?q={searchTerms}"/>
+  <moz:SearchForm>https://pureclear.dusrel.com/</moz:SearchForm>
+</OpenSearchDescription>

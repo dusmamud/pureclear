@@ -17,6 +17,9 @@ const { locale, title, description, path, ogImage = '/og/default.png' } = Astro.
 const tr = t(locale);
 const dir = LOCALE_META[locale].dir;
 const canonical = `https://pureclear.dusrel.com${localePath(locale, path)}`;
+const OG_LOCALES: Record<Locale, string> = { en: 'en_US', hi: 'hi_IN', as: 'as_IN' };
+const ogLocale = OG_LOCALES[locale];
+const ogAlternates = Object.values(OG_LOCALES).filter((l) => l !== ogLocale);
 ---
 
 <!doctype html>
@@ -33,18 +36,32 @@ const canonical = `https://pureclear.dusrel.com${localePath(locale, path)}`;
     <link rel="alternate" hreflang="x-default" href={`https://pureclear.dusrel.com${path}`} />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="PureClear" />
+    <meta property="og:locale" content={ogLocale} />
+    {ogAlternates.map((l) => <meta property="og:locale:alternate" content={l} />)}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={`https://pureclear.dusrel.com${ogImage}`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={`https://pureclear.dusrel.com${ogImage}`} />
+    <meta name="twitter:image:alt" content={title} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0071e3" />
+    <link
+      rel="search"
+      type="application/opensearchdescription+xml"
+      title="PureClear"
+      href="/opensearch.xml"
+    />
     <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <link rel="manifest" href="/manifest.webmanifest" />

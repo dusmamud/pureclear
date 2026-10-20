@@ -226,5 +226,8 @@
   "footer.product": "Product",
   "footer.company": "Company",
   "footer.note": "Every file is processed on your device. Nothing is ever uploaded.",
-  "footer.fineprint": "PureClear runs entirely in your browser using open web technologies. No servers process your files."
+  "footer.fineprint": "PureClear runs entirely in your browser using open web technologies. No servers process your files.",
+  "about.metaDescription": "Why PureClear exists: your photos carry hidden GPS, camera and personal data. A free, private, in-browser tool to see it — and remove it.",
+  "privacy.metaDescription": "PureClear privacy policy: 100% in-browser processing, no uploads, no tracking, no accounts. Exactly what is collected — and what never is.",
+  "terms.metaDescription": "PureClear terms of service in plain language: free to use, your files stay yours, metadata removal is permanent, no warranties."
 }

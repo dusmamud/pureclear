@@ -58,3 +58,15 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           command: pages deploy dist --project-name=pureclear --branch=main --commit-dirty=true
+      # IndexNow: tell Bing/Yandex etc. about all sitemap URLs after each
+      # deploy. The key is public by design (hosted at /<key>.txt).
+      # Non-blocking: indexing must never fail a deploy.
+      - name: Submit URLs to IndexNow
+        continue-on-error: true
+        run: |
+          KEY=eaebd22cdaacc39bbe24fe574113256f
+          URLS=$(grep -oE '<loc>[^<]+' dist/sitemap-0.xml | sed 's/<loc>//' | python3 -c "import sys,json; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))")
+          curl -s -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json" \
+            -d "{\"host\":\"pureclear.dusrel.com\",\"key\":\"$KEY\",\"keyLocation\":\"https://pureclear.dusrel.com/$KEY.txt\",\"urlList\":$URLS}" \
+            -w "IndexNow HTTP %{http_code}\n" || true

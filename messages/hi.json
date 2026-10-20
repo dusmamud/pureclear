@@ -226,5 +226,8 @@
   "footer.product": "Product",
   "footer.company": "Company",
   "footer.note": "Har file aapke device par process hoti hai. Kuch bhi kabhi upload nahi hota.",
-  "footer.fineprint": "PureClear poori tarah aapke browser me open web technologies se chalta hai. Aapki files koi server process nahi karta."
+  "footer.fineprint": "PureClear poori tarah aapke browser me open web technologies se chalta hai. Aapki files koi server process nahi karta.",
+  "about.metaDescription": "PureClear kyu banaya gaya: aapki photos me chhupa GPS, camera aur personal data hota hai. Use dekhne aur hatane ka free, private, in-browser tool.",
+  "privacy.metaDescription": "PureClear privacy policy: files 100% browser me process hoti hain, koi upload nahi, no tracking, no accounts. Kya collect hota hai — aur kya kabhi nahi.",
+  "terms.metaDescription": "PureClear ke terms plain language me: free use, aapki files aapki hi rehti hain, metadata removal permanent hai, koi warranty nahi."
 }

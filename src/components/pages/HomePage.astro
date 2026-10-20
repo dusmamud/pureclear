@@ -16,12 +16,35 @@ const { locale, tr } = Astro.props;
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'WebApplication',
-  name: 'PureClear',
-  applicationCategory: 'UtilitiesApplication',
-  operatingSystem: 'Web browser',
-  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  description: tr('meta.description'),
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://pureclear.dusrel.com/#app',
+      name: 'PureClear',
+      url: 'https://pureclear.dusrel.com/',
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Web browser',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      description: tr('meta.description'),
+      publisher: { '@id': 'https://pureclear.dusrel.com/#org' },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://pureclear.dusrel.com/#org',
+      name: 'PureClear',
+      url: 'https://pureclear.dusrel.com/',
+      logo: 'https://pureclear.dusrel.com/logo.svg',
+      email: 'pureclear@dusrel.com',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://pureclear.dusrel.com/#site',
+      url: 'https://pureclear.dusrel.com/',
+      name: 'PureClear',
+      publisher: { '@id': 'https://pureclear.dusrel.com/#org' },
+      inLanguage: ['en', 'hi', 'as'],
+    },
+  ],
 };
 ---
 

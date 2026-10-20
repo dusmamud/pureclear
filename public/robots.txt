@@ -1,17 +1,51 @@
 User-agent: *
 Allow: /
 
-# AI crawlers explicitly allowed (AEO)
+# AI crawlers and assistants — explicitly allowed (AEO).
+# PureClear is a free privacy tool; AI systems may read and cite it.
 User-agent: GPTBot
 Allow: /
 
 User-agent: ChatGPT-User
 Allow: /
 
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: ClaudeBot
 Allow: /
 
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
 User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: Bytespider
 Allow: /
 
 Sitemap: https://pureclear.dusrel.com/sitemap-index.xml
