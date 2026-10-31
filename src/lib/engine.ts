@@ -62,7 +62,7 @@ async function withRecovery<T>(
 export function readTags(
   buffer: ArrayBuffer,
   filename: string,
-): Promise<Tag[]> {
+): Promise<{ tags: Tag[]; hasIcc: boolean }> {
   return withRecovery((a) => a.read(buffer, filename));
 }
 

@@ -230,5 +230,6 @@
   "about.metaDescription": "Why PureClear exists: your photos carry hidden GPS, camera and personal data. A free, private, in-browser tool to see it — and remove it.",
   "privacy.metaDescription": "PureClear privacy policy: 100% in-browser processing, no uploads, no tracking, no accounts. Exactly what is collected — and what never is.",
   "terms.metaDescription": "PureClear terms of service in plain language: free to use, your files stay yours, metadata removal is permanent, no warranties.",
-  "footer.legal": "Legal"
+  "footer.legal": "Legal",
+  "tool.iccNote": "Color profile kept on purpose so colors stay accurate — it contains no personal data."
 }

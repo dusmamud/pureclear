@@ -19,8 +19,21 @@ export interface Tag {
 /** Groups that are file-system noise, not privacy-relevant metadata. */
 const HIDDEN_GROUPS = new Set(["Composite", "ExifTool", "System", "File"]);
 
-/** ExifTool args used across read/strip/verify — mirrors the reference site. */
-export const STRIP_ARGS = ["-all=", "--icc_profile:all"];
+/**
+ * ICC color profiles are deliberately KEPT by the strip args (see
+ * STRIP_ARGS) so colors stay accurate — a profile is color math, not
+ * personal data. Counting its ~20 sub-tags as "remaining metadata"
+ * would falsely report a successful strip as failed, so the group is
+ * filtered from tag lists and surfaced separately via hasIccProfile().
+ */
+const ICC_GROUP = "ICC_Profile";
+
+/** Strip args: delete everything except the ICC color profile, plus any
+ *  C2PA/JUMBF provenance manifest (creator names + edit history). */
+export const STRIP_ARGS = ["-all=", "--icc_profile:all", "-jumbf:all="];
+// NOTE: -jumbf:all must NOT be added to reads — empirically it makes
+// ExifTool return empty output for files without JUMBF data. The delete
+// side (-jumbf:all=) works fine in strip args.
 const READ_ARGS = ["-G"];
 
 /**
@@ -40,7 +53,7 @@ export function parseExifToolText(text: string): Tag[] {
     const groupMatch = line.match(/^\[([^\]]+)\]\s+/);
     if (!groupMatch) continue;
     const group = groupMatch[1];
-    if (HIDDEN_GROUPS.has(group)) continue;
+    if (HIDDEN_GROUPS.has(group) || group === ICC_GROUP) continue;
     const rest = line.slice(groupMatch[0].length);
     const colon = rest.indexOf(":");
     if (colon === -1) continue;
@@ -51,6 +64,11 @@ export function parseExifToolText(text: string): Tag[] {
     tags.push({ group, name, value });
   }
   return tags;
+}
+
+/** True when the file carries an ICC color profile (kept on purpose). */
+export function hasIccProfile(text: string): boolean {
+  return text.split("\n").some((line) => line.startsWith(`[${ICC_GROUP}]`));
 }
 
 const api = {
@@ -70,8 +88,12 @@ const api = {
     }
   },
 
-  /** Read metadata tags from a file. Returns display-ready tags. */
-  async read(buffer: ArrayBuffer, filename: string): Promise<Tag[]> {
+  /** Read metadata tags from a file. Returns display-ready tags plus
+   *  whether the file carries an ICC color profile (kept on purpose). */
+  async read(
+    buffer: ArrayBuffer,
+    filename: string,
+  ): Promise<{ tags: Tag[]; hasIcc: boolean }> {
     const result = await parseMetadata(
       { name: filename, data: new Uint8Array(buffer) },
       { args: READ_ARGS, fetch: wasmFetch },
@@ -80,7 +102,10 @@ const api = {
       throw new Error(result.error || "Failed to read metadata");
     }
     if (!result.data) throw new Error("Failed to read metadata");
-    return parseExifToolText(result.data);
+    return {
+      tags: parseExifToolText(result.data),
+      hasIcc: hasIccProfile(result.data),
+    };
   },
 
   /**

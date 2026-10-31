@@ -49,6 +49,8 @@ export interface FileState {
   verifying: boolean;
   /** True once tags come from the authoritative ExifTool read. */
   authoritative: boolean;
+  /** True when the file carries an ICC color profile (kept on purpose). */
+  hasIcc: boolean;
   hasGps: boolean;
   cleaned?: ArrayBuffer;
   cleanedName: string;
@@ -132,6 +134,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             tags,
             hasGps: hasGpsTag(tags),
             authoritative: true,
+            hasIcc: false,
           });
           return;
         }
@@ -154,7 +157,9 @@ export default function ToolIsland({ locale, messages }: Props) {
         } catch {
           /* pre-read is best-effort */
         }
-        tags = await readTags(buf, state.file.name);
+        const result = await readTags(buf, state.file.name);
+        tags = result.tags;
+        const hasIcc = result.hasIcc;
         // Guarded: never resurrect a file the user already stripped.
         setFiles((fs) =>
           fs.map((f) =>
@@ -167,6 +172,7 @@ export default function ToolIsland({ locale, messages }: Props) {
                   hasGps: hasGpsTag(tags),
                   verifying: false,
                   authoritative: true,
+                  hasIcc,
                 }
               : f,
           ),
@@ -197,6 +203,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           tags: [],
           verifying: false,
           authoritative: false,
+          hasIcc: false,
           hasGps: false,
           cleanedName: file.name.replace(/(\.[^.]+)?$/, ".clean$1"),
           removedCount: 0,
@@ -564,6 +571,11 @@ function FileRow({
               </p>
             )}
           </div>
+          {f.hasIcc && (
+            <p className="mt-2 px-1 text-xs leading-relaxed text-ink-2">
+              {msg("tool.iccNote")}
+            </p>
+          )}
           {f.tags.length > 0 && (
             <div className="mt-3 overflow-hidden rounded-xl border border-hairline bg-card">
               <div className="max-h-56 overflow-auto">

@@ -230,5 +230,6 @@
   "about.metaDescription": "PureClear kyu banaya gaya: aapki photos me chhupa GPS, camera aur personal data hota hai. Use dekhne aur hatane ka free, private, in-browser tool.",
   "privacy.metaDescription": "PureClear privacy policy: files 100% browser me process hoti hain, koi upload nahi, no tracking, no accounts. Kya collect hota hai — aur kya kabhi nahi.",
   "terms.metaDescription": "PureClear ke terms plain language me: free use, aapki files aapki hi rehti hain, metadata removal permanent hai, koi warranty nahi.",
-  "footer.legal": "Legal"
+  "footer.legal": "Legal",
+  "tool.iccNote": "Color profile jaanboojh kar rakha gaya hai taaki colors sahi rahen — isme koi personal data nahi hota."
 }
