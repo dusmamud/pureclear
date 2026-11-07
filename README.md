@@ -40,3 +40,4 @@ Use Tailwind **logical properties** (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-
 ## License
 
 MIT
+- **Tip:** stripping is lossless — metadata is removed without re-encoding, so image quality is untouched.
