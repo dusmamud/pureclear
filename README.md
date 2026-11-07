@@ -41,3 +41,4 @@ Use Tailwind **logical properties** (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-
 
 MIT
 - **Tip:** stripping is lossless — metadata is removed without re-encoding, so image quality is untouched.
+- **Tip:** PDF metadata is handled too, via `pdf-lib` — not just image EXIF.
