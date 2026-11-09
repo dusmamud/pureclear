@@ -87,6 +87,23 @@ export function editFile(
 }
 
 /**
+ * Replace all metadata with a preset's tags in one pass (strip, then
+ * write), then verify by re-reading.
+ */
+export function swapFile(
+  buffer: ArrayBuffer,
+  filename: string,
+  tags: Record<string, string | number | boolean | (string | number)[]>,
+): Promise<{
+  data: ArrayBuffer;
+  writtenCount: number;
+  remaining: Tag[];
+  hasIcc: boolean;
+}> {
+  return withRecovery((a) => a.swap(buffer, filename, tags));
+}
+
+/**
  * Start loading + booting the WASM engine ahead of first use (file
  * drag-over / dropzone hover). Fire-and-forget: a failed warmup is
  * harmless because the first real call retries through withRecovery.

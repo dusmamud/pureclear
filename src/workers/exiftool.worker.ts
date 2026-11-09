@@ -220,6 +220,57 @@ const api = {
 
     return { data: editedBuffer, remaining, hasIcc };
   },
+  /**
+   * Replace all metadata with a preset's tags in ONE ExifTool pass:
+   * `-all=` deletes everything (except the ICC profile, kept for color
+   * accuracy, and C2PA is deleted too), then the preset tags are written
+   * — so nothing of the original camera data survives. The result is
+   * verified by re-reading, like strip/edit.
+   */
+  async swap(
+    buffer: ArrayBuffer,
+    filename: string,
+    tags: Record<string, string | number | boolean | (string | number)[]>,
+  ): Promise<{
+    data: ArrayBuffer;
+    writtenCount: number;
+    remaining: Tag[];
+    hasIcc: boolean;
+  }> {
+    const file = { name: filename, data: new Uint8Array(buffer) };
+    const swapped = await writeMetadata(file, tags, {
+      args: STRIP_ARGS,
+      fetch: wasmFetch,
+    });
+    if (!swapped.success) {
+      throw new Error(swapped.error || "Failed to swap metadata");
+    }
+    if (!swapped.data) throw new Error("Failed to swap metadata");
+    const swappedBuffer: ArrayBuffer = swapped.data as ArrayBuffer;
+
+    // Verify: re-read the swapped file. Trust, but verify.
+    let remaining: Tag[] = [];
+    let hasIcc = false;
+    try {
+      const check = await parseMetadata(
+        { name: filename, data: new Uint8Array(swappedBuffer) },
+        { args: READ_ARGS, fetch: wasmFetch },
+      );
+      if (check.success && check.data) {
+        remaining = parseExifToolText(check.data);
+        hasIcc = hasIccProfile(check.data);
+      }
+    } catch {
+      // Verification is best-effort; the swapped file is still returned.
+    }
+
+    return {
+      data: swappedBuffer,
+      writtenCount: Object.keys(tags).length,
+      remaining,
+      hasIcc,
+    };
+  },
 };
 
 // Only expose via Comlink when actually running inside a worker.

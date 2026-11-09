@@ -3,6 +3,7 @@ import {
   CloudArrowUp,
   Trash,
   PencilSimple,
+  ArrowsLeftRight,
   DownloadSimple,
   FileArchive,
   ArrowCounterClockwise,
@@ -14,6 +15,7 @@ import {
   readTags,
   stripFile,
   editFile,
+  swapFile,
   disposeEngine,
   warmupEngine,
   type Tag,
@@ -21,6 +23,8 @@ import {
 import { prereadTags } from "../../lib/exifr-preread";
 import { stripPdfMetadata, editPdfMetadata } from "../../lib/pdf";
 import MetadataEditor, { type EditPayload } from "./MetadataEditor";
+import PresetPicker from "./PresetPicker";
+import type { CameraPreset } from "../../data/camera-presets";
 import { zipFiles, downloadBlob } from "../../lib/zip";
 import {
   imageThumbnail,
@@ -57,10 +61,12 @@ export interface FileState {
   hasGps: boolean;
   cleaned?: ArrayBuffer;
   cleanedName: string;
-  /** "strip" = metadata removed, "edit" = metadata edited. */
-  action?: "strip" | "edit";
+  /** "strip" = metadata removed, "edit" = metadata edited, "swap" = metadata replaced by a preset. */
+  action?: "strip" | "edit" | "swap";
   editedCount: number;
   editedName: string;
+  swappedCount: number;
+  swappedName: string;
   removedCount: number;
   remaining: Tag[];
   errorKey?: string;
@@ -104,11 +110,14 @@ export default function ToolIsland({ locale, messages }: Props) {
   const msg = makeMsg(messages);
   const [files, setFiles] = useState<FileState[]>([]);
   const [dragOver, setDragOver] = useState(false);
-  /** Tool mode: "clean" removes metadata, "edit" lets the user change it. */
-  const [mode, setMode] = useState<"clean" | "edit">("clean");
+  /** Tool mode: "clean" removes metadata, "edit" lets the user change it, "swap" replaces it with a device preset. */
+  const [mode, setMode] = useState<"clean" | "edit" | "swap">("clean");
   /** Id of the file whose editor panel is open (edit mode only). */
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
+  /** Id of the file whose preset picker is open (swap mode only). */
+  const [swappingId, setSwappingId] = useState<string | null>(null);
+  const [applyingSwap, setApplyingSwap] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -220,6 +229,8 @@ export default function ToolIsland({ locale, messages }: Props) {
           cleanedName: file.name.replace(/(\.[^.]+)?$/, ".clean$1"),
           editedCount: 0,
           editedName: file.name.replace(/(\.[^.]+)?$/, ".edited$1"),
+          swappedCount: 0,
+          swappedName: file.name.replace(/(\.[^.]+)?$/, ".swapped$1"),
           removedCount: 0,
           remaining: [],
           errorKey: isSupported(file.name) ? undefined : "tool.unsupported",
@@ -369,14 +380,58 @@ export default function ToolIsland({ locale, messages }: Props) {
     [patch],
   );
 
+  /** Replace all metadata with a device preset (swap mode), verify by re-reading. */
+  const swapOne = useCallback(
+    async (st: FileState, preset: CameraPreset) => {
+      setApplyingSwap(true);
+      try {
+        // Same latest-bytes rule as strip/edit: a swap after an edit
+        // builds on the edited output, it does not silently revert it.
+        const buf =
+          st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
+        const { data, writtenCount, remaining, hasIcc } = await swapFile(
+          buf,
+          st.file.name,
+          preset.tags,
+        );
+        patch(st.id, {
+          status: "done",
+          action: "swap",
+          cleaned: data,
+          swappedCount: writtenCount,
+          remaining,
+          tags: remaining,
+          hasIcc,
+          hasGps: hasGpsTag(remaining),
+        });
+        setSwappingId(null);
+      } catch (e) {
+        const key =
+          e instanceof Error && e.message === "encrypted"
+            ? "tool.encryptedPdf"
+            : "tool.error";
+        patch(st.id, { status: "error", errorKey: key });
+        setSwappingId(null);
+      } finally {
+        setApplyingSwap(false);
+      }
+    },
+    [patch],
+  );
+
+  /** Download file name for the action that produced the current output. */
+  const outputName = (st: FileState) =>
+    st.action === "edit"
+      ? st.editedName
+      : st.action === "swap"
+        ? st.swappedName
+        : st.cleanedName;
+
   const downloadOne = (st: FileState) => {
     if (!st.cleaned) return;
     const type =
       st.ext === "pdf" ? "application/pdf" : "application/octet-stream";
-    downloadBlob(
-      new Blob([st.cleaned], { type }),
-      st.action === "edit" ? st.editedName : st.cleanedName,
-    );
+    downloadBlob(new Blob([st.cleaned], { type }), outputName(st));
   };
 
   const downloadAll = () => {
@@ -384,7 +439,7 @@ export default function ToolIsland({ locale, messages }: Props) {
     if (!done.length) return;
     const zipped = zipFiles(
       done.map((f) => ({
-        name: f.action === "edit" ? f.editedName : f.cleanedName,
+        name: outputName(f),
         data: new Uint8Array(f.cleaned as ArrayBuffer),
       })),
     );
@@ -398,6 +453,7 @@ export default function ToolIsland({ locale, messages }: Props) {
     for (const f of files) if (f.thumbUrl) URL.revokeObjectURL(f.thumbUrl);
     setFiles([]);
     setEditingId(null);
+    setSwappingId(null);
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -410,7 +466,7 @@ export default function ToolIsland({ locale, messages }: Props) {
 
   return (
     <div className="contents">
-      {/* Mode tabs: Clean removes metadata, Edit lets the user change it. */}
+      {/* Mode tabs: Clean removes metadata, Edit lets the user change it, Swap replaces it with a device preset. */}
       <div className="mb-4 flex justify-center">
         <div
           role="tablist"
@@ -424,6 +480,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             onClick={() => {
               setMode("clean");
               setEditingId(null);
+              setSwappingId(null);
             }}
             className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
               mode === "clean"
@@ -441,6 +498,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             onClick={() => {
               setMode("edit");
               setEditingId(null);
+              setSwappingId(null);
             }}
             className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
               mode === "edit"
@@ -450,6 +508,24 @@ export default function ToolIsland({ locale, messages }: Props) {
           >
             <PencilSimple size={16} aria-hidden="true" />
             {msg("tool.modeEdit")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "swap"}
+            onClick={() => {
+              setMode("swap");
+              setEditingId(null);
+              setSwappingId(null);
+            }}
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+              mode === "swap"
+                ? "bg-accent text-white"
+                : "text-ink-2 hover:text-ink"
+            }`}
+          >
+            <ArrowsLeftRight size={16} aria-hidden="true" />
+            {msg("tool.modeSwap")}
           </button>
         </div>
       </div>
@@ -536,10 +612,15 @@ export default function ToolIsland({ locale, messages }: Props) {
                 mode={mode}
                 editing={editingId === f.id}
                 savingEdit={savingEdit}
+                swapping={swappingId === f.id}
+                applyingSwap={applyingSwap}
                 onStrip={() => stripOne(f)}
                 onEdit={() => setEditingId(f.id)}
                 onSaveEdit={(payload) => editOne(f, payload)}
                 onCancelEdit={() => setEditingId(null)}
+                onSwap={() => setSwappingId(f.id)}
+                onApplySwap={(preset) => swapOne(f, preset)}
+                onCancelSwap={() => setSwappingId(null)}
                 onDownload={() => downloadOne(f)}
               />
             ))}
@@ -569,22 +650,32 @@ function FileRow({
   mode,
   editing,
   savingEdit,
+  swapping,
+  applyingSwap,
   onStrip,
   onEdit,
   onSaveEdit,
   onCancelEdit,
+  onSwap,
+  onApplySwap,
+  onCancelSwap,
   onDownload,
 }: {
   state: FileState;
   msg: MsgFn;
   locale: Locale;
-  mode: "clean" | "edit";
+  mode: "clean" | "edit" | "swap";
   editing: boolean;
   savingEdit: boolean;
+  swapping: boolean;
+  applyingSwap: boolean;
   onStrip: () => void;
   onEdit: () => void;
   onSaveEdit: (payload: EditPayload) => void;
   onCancelEdit: () => void;
+  onSwap: () => void;
+  onApplySwap: (preset: CameraPreset) => void;
+  onCancelSwap: () => void;
   onDownload: () => void;
 }) {
   // Privacy-first report link: only the sanitized reason, extension and
@@ -652,7 +743,9 @@ function FileRow({
               <CheckCircle size={16} weight="fill" aria-hidden="true" />
               {f.action === "edit"
                 ? msg("tool.tagsEdited", { count: f.editedCount })
-                : msg("tool.tagsRemoved", { count: f.removedCount })}{" "}
+                : f.action === "swap"
+                  ? msg("tool.tagsSwapped", { count: f.swappedCount })
+                  : msg("tool.tagsRemoved", { count: f.removedCount })}{" "}
               · {msg("tool.tagsRemaining", { count: f.remaining.length })}
             </p>
           )}
@@ -703,6 +796,19 @@ function FileRow({
                 {msg("tool.edit")}
               </button>
             )}
+          {mode === "swap" &&
+            f.ext !== "pdf" &&
+            (f.status === "ready" || f.status === "done") &&
+            !swapping && (
+              <button
+                type="button"
+                onClick={onSwap}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+              >
+                <ArrowsLeftRight size={16} aria-hidden="true" />
+                {msg("tool.swap")}
+              </button>
+            )}
           {f.status === "done" && (
             <button
               type="button"
@@ -728,6 +834,19 @@ function FileRow({
             saving={savingEdit}
             onSave={onSaveEdit}
             onCancel={onCancelEdit}
+          />
+        )}
+
+      {/* Inline preset picker — swap mode, per file. Re-openable on done
+          files: a swap builds on the latest bytes, it does not revert. */}
+      {mode === "swap" &&
+        swapping &&
+        (f.status === "ready" || f.status === "done") && (
+          <PresetPicker
+            msg={msg}
+            applying={applyingSwap}
+            onApply={onApplySwap}
+            onCancel={onCancelSwap}
           />
         )}
 

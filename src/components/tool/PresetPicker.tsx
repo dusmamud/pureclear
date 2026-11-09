@@ -1,0 +1,160 @@
+import { useMemo, useState } from "react";
+import {
+  CAMERA_PRESETS,
+  PRESET_CATEGORIES,
+  type CameraPreset,
+  type PresetCategory,
+} from "../../data/camera-presets";
+import type { MsgFn } from "./ToolIsland";
+
+interface PresetPickerProps {
+  msg: MsgFn;
+  onApply: (preset: CameraPreset) => void;
+  onCancel: () => void;
+  applying: boolean;
+}
+
+function headline(preset: CameraPreset): string {
+  const iso = preset.tags["EXIF:ISO"];
+  const f = preset.tags["EXIF:FNumber"];
+  const mm = preset.tags["EXIF:FocalLengthIn35mmFormat"];
+  return `ISO ${iso} · f/${f} · ${mm}mm`;
+}
+
+export default function PresetPicker({
+  msg,
+  onApply,
+  onCancel,
+  applying,
+}: PresetPickerProps) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<PresetCategory | "all">("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return CAMERA_PRESETS.filter((p) => {
+      if (category !== "all" && p.category !== category) return false;
+      if (!q) return true;
+      return (
+        `${p.brand} ${p.model}`.toLowerCase().includes(q) ||
+        p.model.toLowerCase().includes(q)
+      );
+    });
+  }, [query, category]);
+
+  const selected = selectedId
+    ? CAMERA_PRESETS.find((p) => p.id === selectedId)
+    : undefined;
+
+  return (
+    <div className="mt-3 rounded-xl border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-white/5">
+      <p className="text-sm font-medium text-neutral-900 dark:text-white">
+        {msg("swap.title")}
+      </p>
+      <p className="mt-1 text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
+        {msg("swap.mockNote")}
+      </p>
+
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={msg("swap.search")}
+        aria-label={msg("swap.search")}
+        className="mt-3 w-full rounded-lg border border-black/10 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-blue-500 dark:border-white/10 dark:bg-white/5 dark:text-white"
+      />
+
+      <div
+        className="mt-2 flex flex-wrap gap-1.5"
+        role="group"
+        aria-label={msg("swap.title")}
+      >
+        {PRESET_CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => setCategory(c.id)}
+            aria-pressed={category === c.id}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              category === c.id
+                ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                : "bg-black/5 text-neutral-600 hover:bg-black/10 dark:bg-white/10 dark:text-neutral-300 dark:hover:bg-white/15"
+            }`}
+          >
+            {msg(c.labelKey)}
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
+        {msg("swap.count", { count: filtered.length })}
+      </p>
+      <ul
+        className="mt-1 max-h-64 overflow-y-auto pr-1"
+        role="listbox"
+        aria-label={msg("swap.title")}
+      >
+        {filtered.map((p) => {
+          const active = selectedId === p.id;
+          return (
+            <li key={p.id}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => setSelectedId(p.id)}
+                className={`mt-1 flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${
+                  active
+                    ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-500/10"
+                    : "border-black/10 hover:border-black/25 dark:border-white/10 dark:hover:border-white/25"
+                }`}
+              >
+                <span>
+                  <span className="block text-sm font-medium text-neutral-900 dark:text-white">
+                    {p.brand} {p.model}
+                  </span>
+                  <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                    {headline(p)}
+                  </span>
+                </span>
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500 text-xs text-white"
+                  >
+                    ✓
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+        {filtered.length === 0 && (
+          <li className="py-4 text-center text-sm text-neutral-500 dark:text-neutral-400">
+            {msg("swap.noResults")}
+          </li>
+        )}
+      </ul>
+
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={() => selected && onApply(selected)}
+          disabled={!selected || applying}
+          className="flex-1 rounded-full bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {applying ? msg("swap.applying") : msg("swap.apply")}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={applying}
+          className="rounded-full bg-black/5 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-black/10 disabled:opacity-40 dark:bg-white/10 dark:text-neutral-200 dark:hover:bg-white/15"
+        >
+          {msg("swap.cancel")}
+        </button>
+      </div>
+    </div>
+  );
+}
