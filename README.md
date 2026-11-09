@@ -40,6 +40,7 @@ Use Tailwind **logical properties** (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-
 ## License
 
 MIT
+
 - **Tip:** stripping is lossless — metadata is removed without re-encoding, so image quality is untouched.
 - **Tip:** PDF metadata is handled too, via `pdf-lib` — not just image EXIF.
 - **Tip:** contributors must use Tailwind logical properties (`ms-`, `me-`, `ps-`, `pe-`, `text-start`) and never `ml`/`mr`/`pl`/`pr`/`left`/`right`, so future RTL locales work with zero rewrites.
