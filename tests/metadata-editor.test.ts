@@ -184,3 +184,27 @@ describe("tagsToFormValues with exifr preview naming", () => {
     expect(v.longitude).toBe("77.2");
   });
 });
+
+describe("validateValues with initial values", () => {
+  it("does not flag a pre-filled latitude without longitude", () => {
+    const initial = { ...emptyValues(), latitude: "28.6" };
+    // Untouched lat-only file opens valid.
+    expect(validateValues(initial, initial).gpsError).toBeNull();
+    // Changing latitude alone (lon still empty) must flag the pair rule.
+    const changedLat = { ...initial, latitude: "19.0" };
+    expect(validateValues(changedLat, initial).gpsError).toBe(
+      "editor.errGpsPair",
+    );
+    // Adding a longitude clears it.
+    const both = { ...changedLat, longitude: "72.8" };
+    expect(validateValues(both, initial).gpsError).toBeNull();
+    // Clearing the latitude also clears it (both empty = delete GPS).
+    const cleared = { ...initial, latitude: "" };
+    expect(validateValues(cleared, initial).gpsError).toBeNull();
+    // Altitude alone still needs lat+lon.
+    const altOnly = { ...emptyValues(), altitude: "10" };
+    expect(validateValues(altOnly, emptyValues()).gpsError).toBe(
+      "editor.errGpsAlt",
+    );
+  });
+});

@@ -12,6 +12,7 @@ import {
   type EditorValues,
   type ExifTags,
   type FieldDef,
+  type FieldId,
   type PdfEditFields,
 } from "../../lib/metadata-editor";
 import type { MsgFn } from "./ToolIsland";
@@ -51,12 +52,23 @@ export default function MetadataEditor({
     visibleFields.some((f) => f.group === g.id),
   );
 
-  const { errors, gpsError } = validateValues(values);
-  const changedCount = visibleFields.filter(
-    (f) => (values[f.id] ?? "").trim() !== (initial[f.id] ?? "").trim(),
-  ).length;
+  const { errors, gpsError } = validateValues(values, initial);
+  const changedIds = new Set(
+    visibleFields
+      .filter(
+        (f) => (values[f.id] ?? "").trim() !== (initial[f.id] ?? "").trim(),
+      )
+      .map((f) => f.id),
+  );
+  const changedCount = changedIds.size;
+  // Only errors on fields the user actually changed block saving: an
+  // unchanged value is never written, so flagging it would wrongly lock
+  // the form (e.g. a file that already has a latitude without a
+  // longitude). The GPS pair rule itself is already gated the same way
+  // inside validateValues.
   const hasErrors =
-    Object.keys(errors).length > 0 || (gpsError !== null && !isPdf);
+    Object.keys(errors).some((id) => changedIds.has(id as FieldId)) ||
+    (gpsError !== null && !isPdf);
   const canSave = changedCount > 0 && !hasErrors && !saving;
 
   const set = (id: FieldDef["id"], value: string) =>
@@ -106,7 +118,11 @@ export default function MetadataEditor({
             {visibleFields
               .filter((f) => f.group === group.id)
               .map((field) => {
-                const err = errors[field.id];
+                // Show an error only on fields the user changed — an
+                // untouched pre-filled value is never written.
+                const err = changedIds.has(field.id)
+                  ? errors[field.id]
+                  : undefined;
                 const inputCls = `w-full rounded-xl border bg-card px-3 py-2 text-sm text-ink outline-none transition-all placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 ${
                   err ? "border-red-500/60" : "border-hairline"
                 }`;

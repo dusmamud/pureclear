@@ -486,8 +486,17 @@ export function validateField(id: FieldId, value: string): string | null {
 /**
  * Validate a whole form. Returns per-field error keys plus a group-level
  * GPS error (lat/lon must be set together; altitude needs lat/lon).
+ *
+ * The GPS pair rule only fires when the user actually CHANGED a GPS
+ * field: a file that already carries a latitude without a longitude
+ * (partial GPS data exists in the wild) must open in a valid state —
+ * blocking Save until the user invents a longitude or deletes the
+ * latitude would make the editor unusable for that file.
  */
-export function validateValues(values: EditorValues): {
+export function validateValues(
+  values: EditorValues,
+  initial?: EditorValues,
+): {
   errors: Partial<Record<FieldId, string>>;
   gpsError: string | null;
 } {
@@ -500,9 +509,16 @@ export function validateValues(values: EditorValues): {
   const lat = values.latitude.trim();
   const lon = values.longitude.trim();
   const alt = values.altitude.trim();
-  if ((lat === "") !== (lon === "")) gpsError = "editor.errGpsPair";
-  else if (alt !== "" && (lat === "" || lon === ""))
-    gpsError = "editor.errGpsAlt";
+  const gpsChanged =
+    !initial ||
+    initial.latitude.trim() !== lat ||
+    initial.longitude.trim() !== lon ||
+    initial.altitude.trim() !== alt;
+  if (gpsChanged) {
+    if ((lat === "") !== (lon === "")) gpsError = "editor.errGpsPair";
+    else if (alt !== "" && (lat === "" || lon === ""))
+      gpsError = "editor.errGpsAlt";
+  }
   return { errors, gpsError };
 }
 
