@@ -32,6 +32,20 @@ describe("groupTags", () => {
     ]);
   });
 
+  it("collects GPS-named tags from EXIF and Composite under one GPS group", () => {
+    const tags = [
+      T("EXIF", "GPS Latitude Ref", "North"),
+      T("Composite", "GPS Latitude", "28 deg"),
+      T("EXIF", "Make", "Canon"),
+    ];
+    const groups = groupTags(tags);
+    expect(groups.map((g) => g.group)).toEqual(["EXIF", "GPS"]);
+    expect(groups[1].tags.map((t) => t.name)).toEqual([
+      "GPS Latitude Ref",
+      "GPS Latitude",
+    ]);
+  });
+
   it("keeps first-seen order inside a group", () => {
     const tags = [T("EXIF", "B", "1"), T("EXIF", "A", "2")];
     expect(groupTags(tags)[0].tags.map((t) => t.name)).toEqual(["B", "A"]);

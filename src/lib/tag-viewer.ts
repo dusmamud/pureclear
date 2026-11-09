@@ -1,5 +1,16 @@
 import type { Tag } from "./engine";
 
+/**
+ * Display group for a tag. ExifTool's `-G` groups put GPS tags in two
+ * places — "GPS Latitude Ref" lives in EXIF, the coordinate itself only
+ * appears as a Composite tag — so a user looking for "GPS" finds no
+ * GPS group. Tags whose NAME starts with GPS are shown under one
+ * virtual "GPS" group instead (every real GPS tag is named that way).
+ */
+export function displayGroup(tag: Tag): string {
+  return tag.name.toUpperCase().startsWith("GPS") ? "GPS" : tag.group;
+}
+
 /** Group order for the inspector: the groups users look for first. */
 const GROUP_ORDER = [
   "EXIF",
@@ -23,9 +34,10 @@ export interface TagGroup {
 export function groupTags(tags: Tag[]): TagGroup[] {
   const byGroup = new Map<string, Tag[]>();
   for (const t of tags) {
-    const list = byGroup.get(t.group);
+    const group = displayGroup(t);
+    const list = byGroup.get(group);
     if (list) list.push(t);
-    else byGroup.set(t.group, [t]);
+    else byGroup.set(group, [t]);
   }
   const groups = [...byGroup.entries()].map(([group, tags]) => ({
     group,
@@ -92,10 +104,11 @@ export interface CompareRow {
 export function compareTags(a: Tag[], b: Tag[]): CompareRow[] {
   const map = new Map<string, CompareRow>();
   for (const t of a) {
-    const key = `${t.group}\0${t.name}`;
+    const group = displayGroup(t);
+    const key = `${group}\0${t.name}`;
     map.set(key, {
       key,
-      group: t.group,
+      group,
       name: t.name,
       aValue: t.value,
       bValue: null,
@@ -103,7 +116,8 @@ export function compareTags(a: Tag[], b: Tag[]): CompareRow[] {
     });
   }
   for (const t of b) {
-    const key = `${t.group}\0${t.name}`;
+    const group = displayGroup(t);
+    const key = `${group}\0${t.name}`;
     const row = map.get(key);
     if (row) {
       row.bValue = t.value;
@@ -111,7 +125,7 @@ export function compareTags(a: Tag[], b: Tag[]): CompareRow[] {
     } else {
       map.set(key, {
         key,
-        group: t.group,
+        group,
         name: t.name,
         aValue: null,
         bValue: t.value,

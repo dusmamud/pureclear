@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import type { Tag } from "../../lib/engine";
 import {
+  displayGroup,
   filterTags,
   groupTags,
   tagsToCsv,
@@ -57,7 +58,7 @@ function TagTable({ tags, msg }: { tags: Tag[]; msg: MsgFn }) {
                     {tag.name}
                   </span>
                   <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
-                    {tag.group}
+                    {displayGroup(tag)}
                   </span>
                 </td>
                 <td className="max-w-0 px-3 py-[7px] align-top">
