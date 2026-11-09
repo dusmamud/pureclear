@@ -24,6 +24,8 @@ import { prereadTags } from "../../lib/exifr-preread";
 import { stripPdfMetadata, editPdfMetadata } from "../../lib/pdf";
 import MetadataEditor, { type EditPayload } from "./MetadataEditor";
 import PresetPicker from "./PresetPicker";
+import TagInspector from "./TagInspector";
+import ComparePanel from "./ComparePanel";
 import type { CameraPreset } from "../../data/camera-presets";
 import { zipFiles, downloadBlob } from "../../lib/zip";
 import {
@@ -118,6 +120,8 @@ export default function ToolIsland({ locale, messages }: Props) {
   /** Id of the file whose preset picker is open (swap mode only). */
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [applyingSwap, setApplyingSwap] = useState(false);
+  /** Ids of the two files selected for comparison (max 2). */
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -455,6 +459,17 @@ export default function ToolIsland({ locale, messages }: Props) {
     setFiles([]);
     setEditingId(null);
     setSwappingId(null);
+    setCompareIds([]);
+  };
+
+  const toggleCompare = (id: string) => {
+    setCompareIds((ids) =>
+      ids.includes(id)
+        ? ids.filter((x) => x !== id)
+        : ids.length >= 2
+          ? ids
+          : [...ids, id],
+    );
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -464,6 +479,15 @@ export default function ToolIsland({ locale, messages }: Props) {
   };
 
   const doneCount = files.filter((f) => f.status === "done").length;
+
+  /** The two files being compared, when exactly two are selected. */
+  const comparePair =
+    compareIds.length === 2
+      ? [
+          files.find((x) => x.id === compareIds[0]),
+          files.find((x) => x.id === compareIds[1]),
+        ]
+      : null;
 
   return (
     <div className="contents">
@@ -603,6 +627,11 @@ export default function ToolIsland({ locale, messages }: Props) {
               {msg("tool.reset")}
             </button>
           </div>
+          {files.length >= 2 && compareIds.length < 2 && (
+            <p className="border-b border-hairline px-4 py-2 text-xs text-ink-2 sm:px-6">
+              {msg("compare.hint")}
+            </p>
+          )}
           <ul className="divide-y divide-hairline">
             {files.map((f) => (
               <FileRow
@@ -615,6 +644,12 @@ export default function ToolIsland({ locale, messages }: Props) {
                 savingEdit={savingEdit}
                 swapping={swappingId === f.id}
                 applyingSwap={applyingSwap}
+                showCompare={files.length >= 2}
+                compareSelected={compareIds.includes(f.id)}
+                compareDisabled={
+                  compareIds.length >= 2 && !compareIds.includes(f.id)
+                }
+                onToggleCompare={() => toggleCompare(f.id)}
                 onStrip={() => stripOne(f)}
                 onEdit={() => setEditingId(f.id)}
                 onSaveEdit={(payload) => editOne(f, payload)}
@@ -640,6 +675,16 @@ export default function ToolIsland({ locale, messages }: Props) {
           )}
         </section>
       )}
+      {comparePair?.[0] && comparePair?.[1] && (
+        <ComparePanel
+          aName={comparePair[0].file.name}
+          aTags={comparePair[0].tags}
+          bName={comparePair[1].file.name}
+          bTags={comparePair[1].tags}
+          msg={msg}
+          onClose={() => setCompareIds([])}
+        />
+      )}
     </div>
   );
 }
@@ -653,6 +698,10 @@ function FileRow({
   savingEdit,
   swapping,
   applyingSwap,
+  showCompare,
+  compareSelected,
+  compareDisabled,
+  onToggleCompare,
   onStrip,
   onEdit,
   onSaveEdit,
@@ -670,6 +719,10 @@ function FileRow({
   savingEdit: boolean;
   swapping: boolean;
   applyingSwap: boolean;
+  showCompare: boolean;
+  compareSelected: boolean;
+  compareDisabled: boolean;
+  onToggleCompare: () => void;
   onStrip: () => void;
   onEdit: () => void;
   onSaveEdit: (payload: EditPayload) => void;
@@ -767,7 +820,20 @@ function FileRow({
           )}
         </div>
 
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          {showCompare && (f.status === "ready" || f.status === "done") && (
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2 py-2 text-xs font-medium text-ink-2 transition-colors hover:bg-black/5 dark:hover:bg-white/10">
+              <input
+                type="checkbox"
+                checked={compareSelected}
+                disabled={compareDisabled}
+                onChange={onToggleCompare}
+                aria-label={`${f.file.name} — ${msg("compare.select")}`}
+                className="h-4 w-4 accent-blue-500 disabled:opacity-40"
+              />
+              {msg("compare.select")}
+            </label>
+          )}
           {mode === "clean" &&
             (f.status === "ready" || f.status === "done") && (
               <button
@@ -851,88 +917,19 @@ function FileRow({
           />
         )}
 
-      {/* Tags section — own card below the file header row. Shown for
+      {/* Tag inspector — groups, search, JSON/CSV export. Shown for
           ready AND done files: after an edit/swap the user must be able
           to inspect the new tags without downloading the file first.
           After a strip it reads "0 tags found", which confirms the clean. */}
       {(f.status === "ready" || f.status === "done") && (
-        <div className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1">
-            <p className="text-[13px] font-semibold text-ink">
-              {msg("tool.tagsFound", { count: f.tags.length })}
-            </p>
-            {f.verifying && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-ink-2">
-                <SpinnerGap
-                  size={12}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
-                {msg("tool.processing")}
-              </span>
-            )}
-            {f.hasGps && (
-              <p className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
-                <WarningCircle size={14} aria-hidden="true" />
-                {msg("tool.gpsWarning")}
-              </p>
-            )}
-          </div>
-          {f.hasIcc && (
-            <p className="mt-2 px-1 text-xs leading-relaxed text-ink-2">
-              {msg("tool.iccNote")}
-            </p>
-          )}
-          {f.tags.length > 0 && (
-            <div className="mt-3 overflow-hidden rounded-xl border border-hairline bg-card">
-              <div className="max-h-56 overflow-auto">
-                <table className="w-full text-[13px]">
-                  <thead className="sticky top-0 z-10">
-                    <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
-                      <th
-                        scope="col"
-                        className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
-                      >
-                        {msg("inspector.tag")}
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
-                      >
-                        {msg("inspector.value")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-hairline">
-                    {f.tags.slice(0, 100).map((tag, i) => (
-                      <tr
-                        key={i}
-                        className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
-                      >
-                        <td className="px-3 py-[7px] align-top">
-                          <span className="block font-medium leading-snug text-ink">
-                            {tag.name}
-                          </span>
-                          <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
-                            {tag.group}
-                          </span>
-                        </td>
-                        <td className="max-w-0 px-3 py-[7px] align-top">
-                          <span
-                            className="block truncate text-[13px] leading-snug text-ink-2"
-                            title={tag.value}
-                          >
-                            {tag.value}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
+        <TagInspector
+          tags={f.tags}
+          hasGps={f.hasGps}
+          hasIcc={f.hasIcc}
+          verifying={f.verifying}
+          fileName={f.file.name}
+          msg={msg}
+        />
       )}
     </li>
   );
