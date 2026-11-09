@@ -232,7 +232,9 @@ const TAG_KEYS: Partial<Record<FieldId, string[]>> = {
  *  "F Number", "Date/Time Original") — not the short tag names. GPS
  *  coordinates only appear as Composite tags in plain `-G` output (the
  *  EXIF-group copy is suppressed as a duplicate without `-a`), so
- *  Composite is tried first for GPS. */
+ *  Composite is tried first for GPS. Short names after each display name
+ *  are the exifr preview's naming (shown while the WASM engine boots) —
+ *  without them the editor pre-fill is empty for files opened early. */
 const READ_FROM: Partial<Record<FieldId, [string, string][]>> = {
   title: [
     ["XMP", "Title"],
@@ -252,28 +254,62 @@ const READ_FROM: Partial<Record<FieldId, [string, string][]>> = {
     ["XMP", "Subject"],
   ],
   make: [["EXIF", "Make"]],
-  model: [["EXIF", "Camera Model Name"]],
-  lensModel: [["EXIF", "Lens Model"]],
+  model: [
+    ["EXIF", "Camera Model Name"],
+    ["EXIF", "Model"],
+  ],
+  lensModel: [
+    ["EXIF", "Lens Model"],
+    ["EXIF", "LensModel"],
+  ],
   software: [["EXIF", "Software"]],
   iso: [["EXIF", "ISO"]],
-  fNumber: [["EXIF", "F Number"]],
-  exposureTime: [["EXIF", "Exposure Time"]],
-  focalLength: [["EXIF", "Focal Length"]],
-  focal35: [["EXIF", "Focal Length In 35mm Format"]],
-  dateTimeOriginal: [["EXIF", "Date/Time Original"]],
-  createDate: [["EXIF", "Create Date"]],
-  modifyDate: [["EXIF", "Modify Date"]],
+  fNumber: [
+    ["EXIF", "F Number"],
+    ["EXIF", "FNumber"],
+  ],
+  exposureTime: [
+    ["EXIF", "Exposure Time"],
+    ["EXIF", "ExposureTime"],
+  ],
+  focalLength: [
+    ["EXIF", "Focal Length"],
+    ["EXIF", "FocalLength"],
+  ],
+  focal35: [
+    ["EXIF", "Focal Length In 35mm Format"],
+    ["EXIF", "FocalLengthIn35mmFormat"],
+    ["EXIF", "FocalLengthIn35mmFilm"],
+  ],
+  dateTimeOriginal: [
+    ["EXIF", "Date/Time Original"],
+    ["EXIF", "DateTimeOriginal"],
+  ],
+  createDate: [
+    ["EXIF", "Create Date"],
+    ["EXIF", "CreateDate"],
+  ],
+  modifyDate: [
+    ["EXIF", "Modify Date"],
+    ["EXIF", "ModifyDate"],
+  ],
   latitude: [
     ["Composite", "GPS Latitude"],
     ["EXIF", "GPS Latitude"],
+    ["GPS", "GPSLatitude"],
+    ["EXIF", "GPSLatitude"],
   ],
   longitude: [
     ["Composite", "GPS Longitude"],
     ["EXIF", "GPS Longitude"],
+    ["GPS", "GPSLongitude"],
+    ["EXIF", "GPSLongitude"],
   ],
   altitude: [
     ["Composite", "GPS Altitude"],
     ["EXIF", "GPS Altitude"],
+    ["GPS", "GPSAltitude"],
+    ["EXIF", "GPSAltitude"],
   ],
 };
 
@@ -291,12 +327,25 @@ function leadingNumber(value: string): string {
 
 /**
  * Parse ExifTool's DMS GPS display ("28 deg 36' 0.00\" N") back to decimal
- * degrees. Plain decimals pass through unchanged. The EXIF-group copy of
- * a coordinate carries no hemisphere suffix — pass its Ref tag value
- * ("North"/"South"/...) as `refHint` for that case.
+ * degrees. Also handles exifr's preview format ("28,36,0" — comma-
+ * separated degrees, minutes, seconds). Plain decimals pass through
+ * unchanged. The EXIF-group copy of a coordinate carries no hemisphere
+ * suffix — pass its Ref tag value ("North"/"South"/...) as `refHint`
+ * for that case.
  */
 export function parseGpsDisplay(value: string, refHint?: string): string {
   const v = value.trim();
+  const commaDms = /^(\d+(?:\.\d+)?),(\d+(?:\.\d+)?),([\d.]+)$/.exec(v);
+  if (commaDms) {
+    const ref = (refHint ?? "").toUpperCase();
+    let dec =
+      Number(commaDms[1]) +
+      Number(commaDms[2]) / 60 +
+      Number(commaDms[3]) / 3600;
+    if (ref === "S" || ref === "W" || ref === "SOUTH" || ref === "WEST")
+      dec = -dec;
+    return String(Number(dec.toFixed(6)));
+  }
   const dms =
     /^(-?\d+(?:\.\d+)?)\s*deg\s+(\d+(?:\.\d+)?)'\s+([\d.]+)"\s*([NSEW])?$/i.exec(
       v,
@@ -312,6 +361,15 @@ export function parseGpsDisplay(value: string, refHint?: string): string {
   return String(Number(dec.toFixed(6)));
 }
 
+/** Convert an ISO date string (exifr preview) to ExifTool's format. */
+function normalizeDate(value: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/.exec(
+    value.trim(),
+  );
+  if (!m) return value;
+  return `${m[1]}:${m[2]}:${m[3]} ${m[4]}:${m[5]}:${m[6]}`;
+}
+
 /** Pre-fill the editor form from the file's current tags. */
 export function tagsToFormValues(tags: Tag[]): EditorValues {
   const v = emptyValues();
@@ -321,14 +379,25 @@ export function tagsToFormValues(tags: Tag[]): EditorValues {
     for (const [group, name] of sources) {
       const tag = findTag(tags, group, name);
       if (!tag) continue;
-      if (field.id === "latitude" || field.id === "longitude") {
+      if (
+        field.id === "dateTimeOriginal" ||
+        field.id === "createDate" ||
+        field.id === "modifyDate"
+      ) {
+        // exifr previews dates as ISO strings; normalize to ExifTool form.
+        v[field.id] = normalizeDate(tag.value);
+      } else if (field.id === "latitude" || field.id === "longitude") {
         // EXIF-group coordinates carry no hemisphere suffix — the Ref
         // tag next to them holds it ("North"/"South"/"East"/"West").
-        const refTag = findTag(
-          tags,
-          "EXIF",
-          field.id === "latitude" ? "GPS Latitude Ref" : "GPS Longitude Ref",
-        );
+        const refName =
+          field.id === "latitude" ? "GPS Latitude Ref" : "GPS Longitude Ref";
+        const refTag =
+          findTag(tags, "EXIF", refName) ??
+          findTag(
+            tags,
+            "GPS",
+            field.id === "latitude" ? "GPSLatitudeRef" : "GPSLongitudeRef",
+          );
         v[field.id] = parseGpsDisplay(tag.value, refTag?.value);
       } else if (field.type === "number") {
         v[field.id] = leadingNumber(tag.value);

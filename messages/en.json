@@ -277,5 +277,6 @@
   "editor.errLon": "Longitude must be between −180 and 180.",
   "editor.errAlt": "Altitude must be between −10000 and 10000 m.",
   "editor.errGpsPair": "Latitude and longitude must be set together.",
-  "editor.errGpsAlt": "Altitude needs a latitude and longitude."
+  "editor.errGpsAlt": "Altitude needs a latitude and longitude.",
+  "editor.waitingRead": "Reading full metadata…"
 }

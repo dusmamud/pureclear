@@ -159,3 +159,28 @@ describe("buildWriteTags", () => {
     expect(cleared.title).toBeNull();
   });
 });
+
+describe("tagsToFormValues with exifr preview naming", () => {
+  it("pre-fills from short names, comma GPS and ISO dates", () => {
+    const v = tagsToFormValues([
+      { group: "EXIF", name: "Make", value: "TestCam" },
+      { group: "EXIF", name: "Model", value: "ICC-Test" },
+      { group: "EXIF", name: "ISO", value: "100" },
+      {
+        group: "EXIF",
+        name: "DateTimeOriginal",
+        value: "2026-10-18T12:00:00.000Z",
+      },
+      { group: "GPS", name: "GPSLatitude", value: "28,36,0" },
+      { group: "GPS", name: "GPSLatitudeRef", value: "N" },
+      { group: "GPS", name: "GPSLongitude", value: "77,12,0" },
+      { group: "GPS", name: "GPSLongitudeRef", value: "E" },
+    ]);
+    expect(v.make).toBe("TestCam");
+    expect(v.model).toBe("ICC-Test");
+    expect(v.iso).toBe("100");
+    expect(v.dateTimeOriginal).toBe("2026:10:18 12:00:00");
+    expect(v.latitude).toBe("28.6");
+    expect(v.longitude).toBe("77.2");
+  });
+});

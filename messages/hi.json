@@ -277,5 +277,6 @@
   "editor.errLon": "Longitude −180 se 180 ke beech hona chahiye.",
   "editor.errAlt": "Altitude −10000 se 10000 m ke beech hona chahiye.",
   "editor.errGpsPair": "Latitude aur longitude ek saath dena zaroori hai.",
-  "editor.errGpsAlt": "Altitude ke liye latitude aur longitude chahiye."
+  "editor.errGpsAlt": "Altitude ke liye latitude aur longitude chahiye.",
+  "editor.waitingRead": "Poora metadata padha ja raha hai…"
 }

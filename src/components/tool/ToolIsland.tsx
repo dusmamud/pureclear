@@ -260,7 +260,10 @@ export default function ToolIsland({ locale, messages }: Props) {
     async (st: FileState) => {
       patch(st.id, { status: "stripping" });
       try {
-        const buf = (await st.file.arrayBuffer()).slice(0) as ArrayBuffer;
+        // Operate on the latest bytes: after an edit, the edited output
+        // is the file now — stripping the original would lose the edit.
+        const buf =
+          st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
         if (st.ext === "pdf") {
           const cleaned = await stripPdfMetadata(buf);
           const cleanedBuffer = cleaned.buffer.slice(
@@ -273,6 +276,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             cleaned: cleanedBuffer,
             removedCount: st.tags.length,
             remaining: [],
+            tags: [],
           });
         } else {
           // When the authoritative read already counted this file's tags,
@@ -289,6 +293,7 @@ export default function ToolIsland({ locale, messages }: Props) {
             cleaned: data,
             removedCount,
             remaining,
+            tags: remaining,
           });
         }
       } catch (e) {
@@ -307,7 +312,10 @@ export default function ToolIsland({ locale, messages }: Props) {
     async (st: FileState, payload: EditPayload) => {
       setSavingEdit(true);
       try {
-        const buf = (await st.file.arrayBuffer()).slice(0) as ArrayBuffer;
+        // Same latest-bytes rule as strip: a second edit builds on the
+        // first edit's output, it does not silently revert it.
+        const buf =
+          st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
         if (st.ext === "pdf" && payload.kind === "pdf") {
           const edited = await editPdfMetadata(buf, payload.fields);
           const editedBuffer = edited.buffer.slice(
@@ -667,8 +675,7 @@ function FileRow({
 
         <div className="flex shrink-0 gap-2">
           {mode === "clean" &&
-            (f.status === "ready" || f.status === "error") &&
-            f.status === "ready" && (
+            (f.status === "ready" || f.status === "done") && (
               <button
                 type="button"
                 onClick={onStrip}
@@ -678,16 +685,24 @@ function FileRow({
                 {msg("tool.remove")}
               </button>
             )}
-          {mode === "edit" && f.status === "ready" && !editing && (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
-            >
-              <PencilSimple size={16} aria-hidden="true" />
-              {msg("tool.edit")}
-            </button>
-          )}
+          {mode === "edit" &&
+            (f.status === "ready" || f.status === "done") &&
+            !editing && (
+              <button
+                type="button"
+                onClick={onEdit}
+                disabled={!(f.authoritative || !f.verifying)}
+                title={
+                  f.authoritative || !f.verifying
+                    ? undefined
+                    : msg("editor.waitingRead")
+                }
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+              >
+                <PencilSimple size={16} aria-hidden="true" />
+                {msg("tool.edit")}
+              </button>
+            )}
           {f.status === "done" && (
             <button
               type="button"
@@ -701,17 +716,20 @@ function FileRow({
         </div>
       </div>
 
-      {/* Inline editor — edit mode, per file */}
-      {mode === "edit" && editing && f.status === "ready" && (
-        <MetadataEditor
-          tags={f.tags}
-          isPdf={f.ext === "pdf"}
-          msg={msg}
-          saving={savingEdit}
-          onSave={onSaveEdit}
-          onCancel={onCancelEdit}
-        />
-      )}
+      {/* Inline editor — edit mode, per file. Re-openable on done files:
+          the form pre-fills from the latest (edited) tags. */}
+      {mode === "edit" &&
+        editing &&
+        (f.status === "ready" || f.status === "done") && (
+          <MetadataEditor
+            tags={f.tags}
+            isPdf={f.ext === "pdf"}
+            msg={msg}
+            saving={savingEdit}
+            onSave={onSaveEdit}
+            onCancel={onCancelEdit}
+          />
+        )}
 
       {/* Tags section — own card below the file header row */}
       {f.status === "ready" && (
