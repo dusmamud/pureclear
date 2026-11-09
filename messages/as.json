@@ -308,5 +308,22 @@
   "editor.errAlt": "উচ্চতা −10000 ৰ পৰা 10000 m ৰ ভিতৰত হ'ব লাগে।",
   "editor.errGpsPair": "অক্ষাংশ আৰু দ্ৰাঘিমাংশ একেলগে দিব লাগে।",
   "editor.errGpsAlt": "উচ্চতাৰ বাবে অক্ষাংশ আৰু দ্ৰাঘিমাংশ লাগে।",
-  "editor.waitingRead": "সম্পূৰ্ণ মেটাডাটা পঢ়া হৈ আছে…"
+  "editor.waitingRead": "সম্পূৰ্ণ মেটাডাটা পঢ়া হৈ আছে…",
+  "tool.removeSelected": "নিৰ্বাচিত আঁতৰাওক",
+  "tool.cleanAll": "সকলো পৰিষ্কাৰ কৰক",
+  "batch.progress": "{total} টাৰ ভিতৰত {done} টা ফাইলত প্ৰয়োগ কৰি আছে…",
+  "editor.savePreset": "প্ৰিছেট হিচাপে সংৰক্ষণ কৰক",
+  "editor.presetName": "প্ৰিছেটৰ নাম",
+  "editor.presetSaved": "প্ৰিছেট সংৰক্ষণ হ'ল — Swap ত Your presets ৰ তলত পাব।",
+  "editor.saveAll": "সকলো ফাইলত সংৰক্ষণ কৰক",
+  "swap.customTitle": "আপোনাৰ প্ৰিছেট",
+  "swap.noCustom": "এতিয়ালৈকে কোনো কাষ্টম প্ৰিছেট নাই — সম্পাদকৰ পৰা সংৰক্ষণ কৰক।",
+  "swap.exportPack": "এক্সপ'ৰ্ট",
+  "swap.importPack": "ইমপ'ৰ্ট",
+  "swap.imported": "{count} টা প্ৰিছেট ইমপ'ৰ্ট হ'ল।",
+  "swap.importInvalid": "এই ফাইলটো প্ৰিছেট পেক যেন নালাগে।",
+  "swap.deletePreset": "প্ৰিছেট মচক",
+  "swap.applyAll": "সকলো ফাইলত প্ৰয়োগ কৰক",
+  "history.undo": "আনডু",
+  "viewer.notRemovable": "এই টেগটো অকলশৰীয়াকৈ আঁতৰাব নোৱাৰি।"
 }

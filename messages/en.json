@@ -308,5 +308,22 @@
   "editor.errAlt": "Altitude must be between −10000 and 10000 m.",
   "editor.errGpsPair": "Latitude and longitude must be set together.",
   "editor.errGpsAlt": "Altitude needs a latitude and longitude.",
-  "editor.waitingRead": "Reading full metadata…"
+  "editor.waitingRead": "Reading full metadata…",
+  "tool.removeSelected": "Remove selected",
+  "tool.cleanAll": "Clean all",
+  "batch.progress": "Applying to {done} of {total} files…",
+  "editor.savePreset": "Save as preset",
+  "editor.presetName": "Preset name",
+  "editor.presetSaved": "Preset saved — find it in Swap under Your presets.",
+  "editor.saveAll": "Save to all files",
+  "swap.customTitle": "Your presets",
+  "swap.noCustom": "No custom presets yet — save one from the editor.",
+  "swap.exportPack": "Export",
+  "swap.importPack": "Import",
+  "swap.imported": "{count} presets imported.",
+  "swap.importInvalid": "That file doesn't look like a preset pack.",
+  "swap.deletePreset": "Delete preset",
+  "swap.applyAll": "Apply to all files",
+  "history.undo": "Undo",
+  "viewer.notRemovable": "This tag can't be removed individually."
 }

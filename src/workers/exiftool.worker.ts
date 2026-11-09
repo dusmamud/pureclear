@@ -271,6 +271,70 @@ const api = {
       hasIcc,
     };
   },
+  /**
+   * Remove only the given tags (canonical `GROUP:Name` keys, empty
+   * value = delete), leaving everything else untouched. Verified by
+   * re-read, like strip/edit/swap.
+   */
+  async removeTags(
+    buffer: ArrayBuffer,
+    filename: string,
+    keys: string[],
+    knownCount?: number,
+  ): Promise<{
+    data: ArrayBuffer;
+    removedCount: number;
+    remaining: Tag[];
+    hasIcc: boolean;
+  }> {
+    const file = { name: filename, data: new Uint8Array(buffer) };
+
+    let beforeCount = knownCount;
+    if (beforeCount === undefined) {
+      const before = await parseMetadata(file, {
+        args: READ_ARGS,
+        fetch: wasmFetch,
+      });
+      beforeCount =
+        before.success && before.data
+          ? parseExifToolText(before.data).length
+          : 0;
+    }
+
+    const deletes: Record<string, string> = {};
+    for (const key of keys) deletes[key] = "";
+    const removed = await writeMetadata(file, deletes, {
+      fetch: wasmFetch,
+    });
+    if (!removed.success) {
+      throw new Error(removed.error || "Failed to remove tags");
+    }
+    if (!removed.data) throw new Error("Failed to remove tags");
+    const removedBuffer: ArrayBuffer = removed.data as ArrayBuffer;
+
+    // Verify: re-read the file. Trust, but verify.
+    let remaining: Tag[] = [];
+    let hasIcc = false;
+    try {
+      const check = await parseMetadata(
+        { name: filename, data: new Uint8Array(removedBuffer) },
+        { args: READ_ARGS, fetch: wasmFetch },
+      );
+      if (check.success && check.data) {
+        remaining = parseExifToolText(check.data);
+        hasIcc = hasIccProfile(check.data);
+      }
+    } catch {
+      // Verification is best-effort; the file is still returned.
+    }
+
+    return {
+      data: removedBuffer,
+      removedCount: Math.max(0, beforeCount - remaining.length),
+      remaining,
+      hasIcc,
+    };
+  },
 };
 
 // Only expose via Comlink when actually running inside a worker.

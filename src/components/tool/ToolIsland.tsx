@@ -16,10 +16,14 @@ import {
   stripFile,
   editFile,
   swapFile,
+  removeTagsFile,
   disposeEngine,
   warmupEngine,
   type Tag,
 } from "../../lib/engine";
+import { deleteKeysFor } from "../../lib/tag-delete";
+import { saveCustomPreset } from "../../lib/custom-presets";
+import type { ExifTags } from "../../lib/metadata-editor";
 import { prereadTags } from "../../lib/exifr-preread";
 import { stripPdfMetadata, editPdfMetadata } from "../../lib/pdf";
 import MetadataEditor, { type EditPayload } from "./MetadataEditor";
@@ -47,6 +51,22 @@ export type MsgFn = (
   inputs?: Record<string, string | number>,
 ) => string;
 
+/** One undo step: the file's state before an action. Bytes are kept in
+ *  memory for the session only (max 5 steps per file, oldest dropped);
+ *  clearing the files clears history too. */
+export interface HistoryEntry {
+  labelKey: string;
+  bytes: ArrayBuffer;
+  tags: Tag[];
+  hasIcc: boolean;
+  hasGps: boolean;
+  action?: "strip" | "edit" | "swap" | "remove";
+  removedCount: number;
+  editedCount: number;
+  swappedCount: number;
+  status: "ready" | "done";
+}
+
 export interface FileState {
   id: string;
   file: File;
@@ -63,14 +83,17 @@ export interface FileState {
   hasGps: boolean;
   cleaned?: ArrayBuffer;
   cleanedName: string;
-  /** "strip" = metadata removed, "edit" = metadata edited, "swap" = metadata replaced by a preset. */
-  action?: "strip" | "edit" | "swap";
+  /** "strip" = metadata removed, "edit" = metadata edited, "swap" =
+   *  metadata replaced by a preset, "remove" = selected tags removed. */
+  action?: "strip" | "edit" | "swap" | "remove";
   editedCount: number;
   editedName: string;
   swappedCount: number;
   swappedName: string;
+  removedName: string;
   removedCount: number;
   remaining: Tag[];
+  history: HistoryEntry[];
   errorKey?: string;
   thumbUrl?: string;
   sizeWarn: boolean;
@@ -235,8 +258,10 @@ export default function ToolIsland({ locale, messages }: Props) {
           editedName: file.name.replace(/(\.[^.]+)?$/, ".edited$1"),
           swappedCount: 0,
           swappedName: file.name.replace(/(\.[^.]+)?$/, ".swapped$1"),
+          removedName: file.name.replace(/(\.[^.]+)?$/, ".removed$1"),
           removedCount: 0,
           remaining: [],
+          history: [],
           errorKey: isSupported(file.name) ? undefined : "tool.unsupported",
           sizeWarn: file.size > MAX_FILE_SIZE_WARN,
         };
@@ -271,6 +296,90 @@ export default function ToolIsland({ locale, messages }: Props) {
     }
   };
 
+  const toggleCompare = (id: string) => {
+    setCompareIds((ids) =>
+      ids.includes(id)
+        ? ids.filter((x) => x !== id)
+        : ids.length >= 2
+          ? ids
+          : [...ids, id],
+    );
+  };
+
+  /** Snapshot a file's pre-action state for undo (max 5 steps). */
+  const pushHistory = useCallback(
+    (st: FileState, buf: ArrayBuffer, labelKey: string) => {
+      const entry: HistoryEntry = {
+        labelKey,
+        bytes: buf,
+        tags: st.tags,
+        hasIcc: st.hasIcc,
+        hasGps: st.hasGps,
+        action: st.action,
+        removedCount: st.removedCount,
+        editedCount: st.editedCount,
+        swappedCount: st.swappedCount,
+        status: st.status === "done" ? "done" : "ready",
+      };
+      setFiles((fs) =>
+        fs.map((f) =>
+          f.id === st.id
+            ? { ...f, history: [...f.history.slice(-4), entry] }
+            : f,
+        ),
+      );
+    },
+    [],
+  );
+
+  /** Restore the most recent history entry (bytes + tags + counts). */
+  const undoOne = useCallback(
+    (st: FileState) => {
+      const last = st.history[st.history.length - 1];
+      if (!last) return;
+      patch(st.id, {
+        status: last.status,
+        cleaned: last.status === "done" ? last.bytes : undefined,
+        tags: last.tags,
+        remaining: last.tags,
+        hasIcc: last.hasIcc,
+        hasGps: last.hasGps,
+        action: last.action,
+        removedCount: last.removedCount,
+        editedCount: last.editedCount,
+        swappedCount: last.swappedCount,
+        history: st.history.slice(0, -1),
+      });
+      setEditingId(null);
+      setSwappingId(null);
+    },
+    [patch],
+  );
+
+  /** Batch progress: {done, total} while an apply-to-all is running. */
+  const [batchProgress, setBatchProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
+
+  /** Run one action over many files, sequentially, with progress. */
+  const runBatch = useCallback(
+    async (
+      targets: FileState[],
+      fn: (f: FileState) => Promise<void>,
+    ): Promise<void> => {
+      if (targets.length === 0 || batchProgress) return;
+      setBatchProgress({ done: 0, total: targets.length });
+      for (const [i, f] of targets.entries()) {
+        // Per-file errors already surface as error status inside fn.
+        await fn(f);
+        setBatchProgress({ done: i + 1, total: targets.length });
+      }
+      setBatchProgress(null);
+    },
+    [batchProgress],
+  );
+
   const stripOne = useCallback(
     async (st: FileState) => {
       patch(st.id, { status: "stripping" });
@@ -279,6 +388,7 @@ export default function ToolIsland({ locale, messages }: Props) {
         // is the file now — stripping the original would lose the edit.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
+        pushHistory(st, buf, "tool.modeClean");
         if (st.ext === "pdf") {
           const cleaned = await stripPdfMetadata(buf);
           const cleanedBuffer = cleaned.buffer.slice(
@@ -331,6 +441,7 @@ export default function ToolIsland({ locale, messages }: Props) {
         // first edit's output, it does not silently revert it.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
+        pushHistory(st, buf, "tool.modeEdit");
         if (st.ext === "pdf" && payload.kind === "pdf") {
           const edited = await editPdfMetadata(buf, payload.fields);
           const editedBuffer = edited.buffer.slice(
@@ -393,6 +504,7 @@ export default function ToolIsland({ locale, messages }: Props) {
         // builds on the edited output, it does not silently revert it.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
+        pushHistory(st, buf, "tool.modeSwap");
         const { data, writtenCount, remaining, hasIcc } = await swapFile(
           buf,
           st.file.name,
@@ -424,13 +536,98 @@ export default function ToolIsland({ locale, messages }: Props) {
     [patch],
   );
 
+  /** Remove only the selected tags, keep everything else. PDFs are
+   *  excluded (their Info-dict editing goes through the editor). */
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set());
+  const removeSelectedOne = useCallback(
+    async (st: FileState, tags: Tag[]) => {
+      const keys = deleteKeysFor(tags);
+      if (keys.length === 0) return;
+      setRemovingIds((s) => new Set(s).add(st.id));
+      try {
+        const buf =
+          st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
+        pushHistory(st, buf, "tool.removeSelected");
+        const { data, removedCount, remaining, hasIcc } = await removeTagsFile(
+          buf,
+          st.file.name,
+          keys,
+          st.tags.length,
+        );
+        patch(st.id, {
+          status: "done",
+          action: "remove",
+          cleaned: data,
+          removedCount,
+          remaining,
+          tags: remaining,
+          hasIcc,
+          hasGps: hasGpsTag(remaining),
+          verifying: false,
+        });
+      } catch (e) {
+        const key =
+          e instanceof Error && e.message === "encrypted"
+            ? "tool.encryptedPdf"
+            : "tool.error";
+        patch(st.id, { status: "error", errorKey: key });
+      } finally {
+        setRemovingIds((s) => {
+          const next = new Set(s);
+          next.delete(st.id);
+          return next;
+        });
+      }
+    },
+    [patch],
+  );
+
+  /** Clean all ready files, one by one, with progress. */
+  const cleanAll = useCallback(async () => {
+    const targets = files.filter((f) => f.status === "ready");
+    await runBatch(targets, stripOne);
+  }, [files, runBatch, stripOne]);
+
+  /** Apply one edit payload to every matching file (PDF payloads only
+   *  to PDFs, EXIF payloads only to photos). */
+  const saveEditAll = useCallback(
+    async (payload: EditPayload) => {
+      const targets = files.filter(
+        (f) =>
+          (f.status === "ready" || f.status === "done") &&
+          ((payload.kind === "pdf" && f.ext === "pdf") ||
+            (payload.kind === "exif" && f.ext !== "pdf")),
+      );
+      await runBatch(targets, (f) => editOne(f, payload));
+    },
+    [files, runBatch, editOne],
+  );
+
+  /** Apply one preset to every ready/done photo (PDFs excluded). */
+  const applySwapAll = useCallback(
+    async (preset: CameraPreset) => {
+      const targets = files.filter(
+        (f) => f.ext !== "pdf" && (f.status === "ready" || f.status === "done"),
+      );
+      await runBatch(targets, (f) => swapOne(f, preset));
+    },
+    [files, runBatch, swapOne],
+  );
+
+  /** Save an edited tag set as a custom preset (localStorage only). */
+  const savePresetFromEdit = useCallback((name: string, tags: ExifTags) => {
+    saveCustomPreset(name, tags);
+  }, []);
+
   /** Download file name for the action that produced the current output. */
   const outputName = (st: FileState) =>
     st.action === "edit"
       ? st.editedName
       : st.action === "swap"
         ? st.swappedName
-        : st.cleanedName;
+        : st.action === "remove"
+          ? st.removedName
+          : st.cleanedName;
 
   const downloadOne = (st: FileState) => {
     if (!st.cleaned) return;
@@ -460,16 +657,6 @@ export default function ToolIsland({ locale, messages }: Props) {
     setEditingId(null);
     setSwappingId(null);
     setCompareIds([]);
-  };
-
-  const toggleCompare = (id: string) => {
-    setCompareIds((ids) =>
-      ids.includes(id)
-        ? ids.filter((x) => x !== id)
-        : ids.length >= 2
-          ? ids
-          : [...ids, id],
-    );
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -618,15 +805,37 @@ export default function ToolIsland({ locale, messages }: Props) {
             <h2 className="text-[15px] font-semibold tracking-[-0.01em]">
               {msg("tool.yourFiles", { count: files.length })}
             </h2>
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
-            >
-              <ArrowCounterClockwise size={16} aria-hidden="true" />
-              {msg("tool.reset")}
-            </button>
+            <div className="flex items-center gap-1">
+              {mode === "clean" &&
+                files.filter((f) => f.status === "ready").length >= 2 && (
+                  <button
+                    type="button"
+                    onClick={cleanAll}
+                    disabled={batchProgress !== null}
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Trash size={16} aria-hidden="true" />
+                    {msg("tool.cleanAll")}
+                  </button>
+                )}
+              <button
+                type="button"
+                onClick={reset}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+              >
+                <ArrowCounterClockwise size={16} aria-hidden="true" />
+                {msg("tool.reset")}
+              </button>
+            </div>
           </div>
+          {batchProgress && (
+            <p className="border-b border-hairline px-4 py-2 text-xs text-ink-2 sm:px-6">
+              {msg("batch.progress", {
+                done: batchProgress.done,
+                total: batchProgress.total,
+              })}
+            </p>
+          )}
           {files.length >= 2 && compareIds.length < 2 && (
             <p className="border-b border-hairline px-4 py-2 text-xs text-ink-2 sm:px-6">
               {msg("compare.hint")}
@@ -644,6 +853,7 @@ export default function ToolIsland({ locale, messages }: Props) {
                 savingEdit={savingEdit}
                 swapping={swappingId === f.id}
                 applyingSwap={applyingSwap}
+                removing={removingIds.has(f.id)}
                 showCompare={files.length >= 2}
                 compareSelected={compareIds.includes(f.id)}
                 compareDisabled={
@@ -653,10 +863,17 @@ export default function ToolIsland({ locale, messages }: Props) {
                 onStrip={() => stripOne(f)}
                 onEdit={() => setEditingId(f.id)}
                 onSaveEdit={(payload) => editOne(f, payload)}
+                onSaveEditAll={saveEditAll}
+                showSaveAll={files.length >= 2}
+                onSavePreset={savePresetFromEdit}
                 onCancelEdit={() => setEditingId(null)}
                 onSwap={() => setSwappingId(f.id)}
                 onApplySwap={(preset) => swapOne(f, preset)}
+                onApplySwapAll={applySwapAll}
+                showApplyAll={files.length >= 2}
                 onCancelSwap={() => setSwappingId(null)}
+                onUndo={() => undoOne(f)}
+                onRemoveSelected={(tags) => removeSelectedOne(f, tags)}
                 onDownload={() => downloadOne(f)}
               />
             ))}
@@ -698,6 +915,7 @@ function FileRow({
   savingEdit,
   swapping,
   applyingSwap,
+  removing,
   showCompare,
   compareSelected,
   compareDisabled,
@@ -705,10 +923,17 @@ function FileRow({
   onStrip,
   onEdit,
   onSaveEdit,
+  onSaveEditAll,
+  showSaveAll,
+  onSavePreset,
   onCancelEdit,
   onSwap,
   onApplySwap,
+  onApplySwapAll,
+  showApplyAll,
   onCancelSwap,
+  onUndo,
+  onRemoveSelected,
   onDownload,
 }: {
   state: FileState;
@@ -719,6 +944,7 @@ function FileRow({
   savingEdit: boolean;
   swapping: boolean;
   applyingSwap: boolean;
+  removing: boolean;
   showCompare: boolean;
   compareSelected: boolean;
   compareDisabled: boolean;
@@ -726,12 +952,33 @@ function FileRow({
   onStrip: () => void;
   onEdit: () => void;
   onSaveEdit: (payload: EditPayload) => void;
+  onSaveEditAll: (payload: EditPayload) => void;
+  showSaveAll: boolean;
+  onSavePreset: (name: string, tags: ExifTags) => void;
   onCancelEdit: () => void;
   onSwap: () => void;
   onApplySwap: (preset: CameraPreset) => void;
+  onApplySwapAll: (preset: CameraPreset) => void;
+  showApplyAll: boolean;
   onCancelSwap: () => void;
+  onUndo: () => void;
+  onRemoveSelected: (tags: Tag[]) => Promise<void>;
   onDownload: () => void;
 }) {
+  // Per-tag selection for selective removal, keyed by raw group+name.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const tagKey = (t: Tag) => `${t.group}|${t.name}`;
+  const selectedTags = f.tags.filter((t) => selected.has(tagKey(t)));
+  const toggleSelect = (t: Tag) => {
+    setSelected((s) => {
+      const next = new Set(s);
+      const k = tagKey(t);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
+      return next;
+    });
+  };
+  const lastHistory = f.history[f.history.length - 1];
   // Privacy-first report link: only the sanitized reason, extension and
   // byte size travel in the URL — never the file name.
   const reportUrl =
@@ -886,6 +1133,17 @@ function FileRow({
               {msg("tool.download")}
             </button>
           )}
+          {lastHistory && (f.status === "ready" || f.status === "done") && (
+            <button
+              type="button"
+              onClick={onUndo}
+              title={msg("history.undo")}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-2 transition-all duration-300 hover:bg-black/[0.04] hover:text-ink active:scale-[0.97] dark:hover:bg-white/[0.06]"
+            >
+              <ArrowCounterClockwise size={16} aria-hidden="true" />
+              {msg("history.undo")} {msg(lastHistory.labelKey)}
+            </button>
+          )}
         </div>
       </div>
 
@@ -900,6 +1158,9 @@ function FileRow({
             msg={msg}
             saving={savingEdit}
             onSave={onSaveEdit}
+            onSaveAll={onSaveEditAll}
+            showSaveAll={showSaveAll}
+            onSavePreset={onSavePreset}
             onCancel={onCancelEdit}
           />
         )}
@@ -913,6 +1174,8 @@ function FileRow({
             msg={msg}
             applying={applyingSwap}
             onApply={onApplySwap}
+            onApplyAll={onApplySwapAll}
+            showApplyAll={showApplyAll}
             onCancel={onCancelSwap}
           />
         )}
@@ -920,7 +1183,8 @@ function FileRow({
       {/* Tag inspector — groups, search, JSON/CSV export. Shown for
           ready AND done files: after an edit/swap the user must be able
           to inspect the new tags without downloading the file first.
-          After a strip it reads "0 tags found", which confirms the clean. */}
+          After a strip it reads "0 tags found", which confirms the clean.
+          Per-tag checkboxes (photos only) select tags for removal. */}
       {(f.status === "ready" || f.status === "done") && (
         <TagInspector
           tags={f.tags}
@@ -929,6 +1193,15 @@ function FileRow({
           verifying={f.verifying}
           fileName={f.file.name}
           msg={msg}
+          selectable={f.ext !== "pdf"}
+          selected={selected}
+          onToggleSelect={toggleSelect}
+          selectedTags={selectedTags}
+          removing={removing}
+          onRemoveSelected={async () => {
+            await onRemoveSelected(selectedTags);
+            setSelected(new Set());
+          }}
         />
       )}
     </li>

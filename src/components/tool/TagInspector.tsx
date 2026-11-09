@@ -3,9 +3,11 @@ import {
   CaretRight,
   DownloadSimple,
   SpinnerGap,
+  Trash,
   WarningCircle,
 } from "@phosphor-icons/react";
 import type { Tag } from "../../lib/engine";
+import { tagDeleteKey } from "../../lib/tag-delete";
 import {
   displayGroup,
   filterTags,
@@ -23,19 +25,43 @@ interface TagInspectorProps {
   verifying: boolean;
   fileName: string;
   msg: MsgFn;
+  /** Selective removal (photos only): per-tag checkboxes. */
+  selectable?: boolean;
+  selected?: Set<string>;
+  onToggleSelect?: (tag: Tag) => void;
+  selectedTags?: Tag[];
+  removing?: boolean;
+  onRemoveSelected?: () => void;
 }
 
 function baseName(fileName: string): string {
   return fileName.replace(/\.[^.]+$/, "");
 }
 
-function TagTable({ tags, msg }: { tags: Tag[]; msg: MsgFn }) {
+function TagTable({
+  tags,
+  msg,
+  selectable,
+  selected,
+  onToggleSelect,
+}: {
+  tags: Tag[];
+  msg: MsgFn;
+  selectable?: boolean;
+  selected?: Set<string>;
+  onToggleSelect?: (tag: Tag) => void;
+}) {
   return (
     <div className="overflow-hidden rounded-xl border border-hairline bg-card">
       <div className="max-h-56 overflow-auto">
         <table className="w-full text-[13px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
+              {selectable && (
+                <th scope="col" className="w-10 px-2 py-2">
+                  <span className="sr-only">{msg("tool.removeSelected")}</span>
+                </th>
+              )}
               <th
                 scope="col"
                 className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
@@ -51,26 +77,48 @@ function TagTable({ tags, msg }: { tags: Tag[]; msg: MsgFn }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-hairline">
-            {tags.slice(0, 100).map((tag, i) => (
-              <tr key={i} className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}>
-                <td className="px-3 py-[7px] align-top">
-                  <span className="block font-medium leading-snug text-ink">
-                    {tag.name}
-                  </span>
-                  <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
-                    {displayGroup(tag)}
-                  </span>
-                </td>
-                <td className="max-w-0 px-3 py-[7px] align-top">
-                  <span
-                    className="block truncate text-[13px] leading-snug text-ink-2"
-                    title={tag.value}
-                  >
-                    {tag.value}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {tags.slice(0, 100).map((tag, i) => {
+              const removable = tagDeleteKey(tag) !== null;
+              const key = `${tag.group}|${tag.name}`;
+              return (
+                <tr
+                  key={i}
+                  className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
+                >
+                  {selectable && (
+                    <td className="w-10 px-2 py-[7px] align-top">
+                      <input
+                        type="checkbox"
+                        checked={selected?.has(key) ?? false}
+                        disabled={!removable}
+                        title={
+                          removable ? undefined : msg("viewer.notRemovable")
+                        }
+                        onChange={() => onToggleSelect?.(tag)}
+                        aria-label={`${tag.name} — ${msg("tool.removeSelected")}`}
+                        className="mt-0.5 h-4 w-4 accent-blue-500 disabled:opacity-30"
+                      />
+                    </td>
+                  )}
+                  <td className="px-3 py-[7px] align-top">
+                    <span className="block font-medium leading-snug text-ink">
+                      {tag.name}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
+                      {displayGroup(tag)}
+                    </span>
+                  </td>
+                  <td className="max-w-0 px-3 py-[7px] align-top">
+                    <span
+                      className="block truncate text-[13px] leading-snug text-ink-2"
+                      title={tag.value}
+                    >
+                      {tag.value}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -85,6 +133,12 @@ export default function TagInspector({
   verifying,
   fileName,
   msg,
+  selectable,
+  selected,
+  onToggleSelect,
+  selectedTags,
+  removing,
+  onRemoveSelected,
 }: TagInspectorProps) {
   const [query, setQuery] = useState("");
   const [group, setGroup] = useState("all");
@@ -148,6 +202,19 @@ export default function TagInspector({
             <DownloadSimple size={12} aria-hidden="true" />
             {msg("viewer.exportCsv")}
           </button>
+          {selectable && (selectedTags?.length ?? 0) > 0 && (
+            <button
+              type="button"
+              onClick={onRemoveSelected}
+              disabled={removing}
+              className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-500/25 disabled:opacity-40 dark:text-red-300"
+            >
+              <Trash size={12} aria-hidden="true" />
+              {removing
+                ? msg("tool.removing")
+                : `${msg("tool.removeSelected")} (${selectedTags?.length})`}
+            </button>
+          )}
         </span>
       </div>
       {hasIcc && (
@@ -209,7 +276,13 @@ export default function TagInspector({
             </p>
           ) : filtering ? (
             <div className="mt-3">
-              <TagTable tags={filtered} msg={msg} />
+              <TagTable
+                tags={filtered}
+                msg={msg}
+                selectable={selectable}
+                selected={selected}
+                onToggleSelect={onToggleSelect}
+              />
             </div>
           ) : (
             <div className="mt-3 space-y-2">
@@ -226,7 +299,13 @@ export default function TagInspector({
                       · {g.tags.length}
                     </span>
                   </summary>
-                  <TagTable tags={g.tags} msg={msg} />
+                  <TagTable
+                    tags={g.tags}
+                    msg={msg}
+                    selectable={selectable}
+                    selected={selected}
+                    onToggleSelect={onToggleSelect}
+                  />
                 </details>
               ))}
             </div>

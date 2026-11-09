@@ -27,6 +27,11 @@ interface Props {
   msg: MsgFn;
   saving: boolean;
   onSave: (payload: EditPayload) => void;
+  /** Batch: same payload to every matching file (photos or PDFs). */
+  onSaveAll?: (payload: EditPayload) => void;
+  showSaveAll?: boolean;
+  /** Custom preset: save the changed EXIF tags under a name (photos only). */
+  onSavePreset?: (name: string, tags: ExifTags) => void;
   onCancel: () => void;
 }
 
@@ -40,8 +45,14 @@ export default function MetadataEditor({
   msg,
   saving,
   onSave,
+  onSaveAll,
+  showSaveAll,
+  onSavePreset,
   onCancel,
 }: Props) {
+  const [namingPreset, setNamingPreset] = useState(false);
+  const [presetName, setPresetName] = useState("");
+  const [presetSaved, setPresetSaved] = useState(false);
   const [initial] = useState(() => tagsToFormValues(tags));
   const [values, setValues] = useState<EditorValues>(initial);
 
@@ -74,18 +85,41 @@ export default function MetadataEditor({
   const set = (id: FieldDef["id"], value: string) =>
     setValues((v) => ({ ...v, [id]: value }));
 
-  const save = () => {
-    if (!canSave) return;
+  const buildPayload = (): EditPayload => {
     if (isPdf) {
-      onSave({
+      return {
         kind: "pdf",
         fields: buildPdfEditFields(values, initial),
         changedCount,
-      });
-    } else {
-      const { tags: writeTags } = buildWriteTags(values, initial);
-      onSave({ kind: "exif", tags: writeTags, changedCount });
+      };
     }
+    const { tags: writeTags } = buildWriteTags(values, initial);
+    return { kind: "exif", tags: writeTags, changedCount };
+  };
+
+  const save = () => {
+    if (!canSave) return;
+    onSave(buildPayload());
+  };
+
+  const saveAll = () => {
+    if (!canSave || !onSaveAll) return;
+    onSaveAll(buildPayload());
+  };
+
+  /** Save the changed EXIF tags (deletions dropped) as a custom preset. */
+  const confirmSavePreset = () => {
+    if (!onSavePreset || !presetName.trim() || isPdf) return;
+    const { tags: writeTags } = buildWriteTags(values, initial);
+    const clean: ExifTags = {};
+    for (const [k, v] of Object.entries(writeTags)) {
+      if (v !== "") clean[k] = v;
+    }
+    if (Object.keys(clean).length === 0) return;
+    onSavePreset(presetName.trim(), clean);
+    setNamingPreset(false);
+    setPresetName("");
+    setPresetSaved(true);
   };
 
   return (
@@ -172,24 +206,85 @@ export default function MetadataEditor({
         {msg("editor.clearNote")}
       </p>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
-        >
-          {msg("editor.cancel")}
-        </button>
-        <button
-          type="button"
-          onClick={save}
-          disabled={!canSave}
-          className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          <Check size={16} aria-hidden="true" />
-          {saving ? msg("editor.saving") : msg("editor.save")}
-        </button>
-      </div>
+      {namingPreset ? (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          <input
+            type="text"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            placeholder={msg("editor.presetName")}
+            aria-label={msg("editor.presetName")}
+            autoFocus
+            className="w-full rounded-xl border border-hairline bg-card px-3 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 sm:w-64"
+          />
+          <button
+            type="button"
+            onClick={confirmSavePreset}
+            disabled={!presetName.trim()}
+            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Check size={16} aria-hidden="true" />
+            {msg("editor.save")}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setNamingPreset(false);
+              setPresetName("");
+            }}
+            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+          >
+            {msg("editor.cancel")}
+          </button>
+        </div>
+      ) : (
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+          {presetSaved && (
+            <p className="self-center text-xs font-medium text-green-700 sm:me-auto dark:text-green-400">
+              {msg("editor.presetSaved")}
+            </p>
+          )}
+          {!isPdf && onSavePreset && (
+            <button
+              type="button"
+              onClick={() => {
+                setNamingPreset(true);
+                setPresetSaved(false);
+              }}
+              disabled={!canSave}
+              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {msg("editor.savePreset")}
+            </button>
+          )}
+          {showSaveAll && onSaveAll && (
+            <button
+              type="button"
+              onClick={saveAll}
+              disabled={!canSave}
+              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {msg("editor.saveAll")}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+          >
+            {msg("editor.cancel")}
+          </button>
+          <button
+            type="button"
+            onClick={save}
+            disabled={!canSave}
+            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Check size={16} aria-hidden="true" />
+            {saving ? msg("editor.saving") : msg("editor.save")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

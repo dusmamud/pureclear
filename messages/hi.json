@@ -308,5 +308,22 @@
   "editor.errAlt": "Altitude −10000 se 10000 m ke beech hona chahiye.",
   "editor.errGpsPair": "Latitude aur longitude ek saath dena zaroori hai.",
   "editor.errGpsAlt": "Altitude ke liye latitude aur longitude chahiye.",
-  "editor.waitingRead": "Poora metadata padha ja raha hai…"
+  "editor.waitingRead": "Poora metadata padha ja raha hai…",
+  "tool.removeSelected": "Selected hatao",
+  "tool.cleanAll": "Sabhi clean karo",
+  "batch.progress": "{total} me se {done} files par laga rahe hain…",
+  "editor.savePreset": "Preset ke roop me save karo",
+  "editor.presetName": "Preset ka naam",
+  "editor.presetSaved": "Preset save ho gaya — Swap me Your presets ke neeche milega.",
+  "editor.saveAll": "Sabhi files me save karo",
+  "swap.customTitle": "Aapke presets",
+  "swap.noCustom": "Abhi koi custom preset nahi — editor se save karo.",
+  "swap.exportPack": "Export",
+  "swap.importPack": "Import",
+  "swap.imported": "{count} presets import ho gaye.",
+  "swap.importInvalid": "Yeh file preset pack jaisi nahi lagti.",
+  "swap.deletePreset": "Preset delete karo",
+  "swap.applyAll": "Sabhi files par lagao",
+  "history.undo": "Undo",
+  "viewer.notRemovable": "Yeh tag alag se nahi hata sakte."
 }

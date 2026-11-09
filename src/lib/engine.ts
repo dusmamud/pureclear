@@ -74,6 +74,21 @@ export function stripFile(
   return withRecovery((a) => a.strip(buffer, filename, knownCount));
 }
 
+/** Remove only the given canonical tag keys, verify by re-reading. */
+export function removeTagsFile(
+  buffer: ArrayBuffer,
+  filename: string,
+  keys: string[],
+  knownCount?: number,
+): Promise<{
+  data: ArrayBuffer;
+  removedCount: number;
+  remaining: Tag[];
+  hasIcc: boolean;
+}> {
+  return withRecovery((a) => a.removeTags(buffer, filename, keys, knownCount));
+}
+
 /**
  * Write metadata tags losslessly, then verify by re-reading.
  * `tags` maps ExifTool tag names to values; "" deletes a tag.
