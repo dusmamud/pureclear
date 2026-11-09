@@ -41,3 +41,24 @@ describe("parseExifToolText", () => {
     expect(tags[0].value).toBe("2026:10:18 12:00:00");
   });
 });
+
+describe("parseExifToolText GPS", () => {
+  it("keeps Composite GPS coordinates but drops other Composite tags", () => {
+    const tags = parseExifToolText(
+      [
+        "[Composite] GPS Latitude : 28 deg 36' 0.00\" N",
+        "[Composite] GPS Longitude : 77 deg 12' 0.00\" E",
+        "[Composite] GPS Position : 28 deg 36' 0.00\" N, 77 deg 12' 0.00\" E",
+        "[Composite] ImageSize : 4000x3000",
+        "[EXIF] GPS Latitude Ref : North",
+        "[EXIF] Make : TestCam",
+      ].join("\n"),
+    );
+    expect(tags.map((t) => `${t.group}:${t.name}`)).toEqual([
+      "Composite:GPS Latitude",
+      "Composite:GPS Longitude",
+      "EXIF:GPS Latitude Ref",
+      "EXIF:Make",
+    ]);
+  });
+});

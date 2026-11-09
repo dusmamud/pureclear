@@ -20,6 +20,19 @@ export interface Tag {
 const HIDDEN_GROUPS = new Set(["Composite", "ExifTool", "System", "File"]);
 
 /**
+ * Composite GPS tags are the ONLY place plain `-G` output shows GPS
+ * coordinates (the EXIF-group copy is suppressed as a duplicate without
+ * `-a`). Hiding Composite entirely made coordinates invisible in the
+ * inspector and un-editable, so these three are kept. "GPS Position" is
+ * left out — it is just lat+lon joined, already shown separately.
+ */
+const KEPT_COMPOSITE_TAGS = new Set([
+  "GPS Latitude",
+  "GPS Longitude",
+  "GPS Altitude",
+]);
+
+/**
  * ICC color profiles are deliberately KEPT by the strip args (see
  * STRIP_ARGS) so colors stay accurate — a profile is color math, not
  * personal data. Counting its ~20 sub-tags as "remaining metadata"
@@ -53,11 +66,15 @@ export function parseExifToolText(text: string): Tag[] {
     const groupMatch = line.match(/^\[([^\]]+)\]\s+/);
     if (!groupMatch) continue;
     const group = groupMatch[1];
-    if (HIDDEN_GROUPS.has(group) || group === ICC_GROUP) continue;
+    if (group === ICC_GROUP) continue;
     const rest = line.slice(groupMatch[0].length);
     const colon = rest.indexOf(":");
     if (colon === -1) continue;
     const name = rest.slice(0, colon).trim();
+    if (HIDDEN_GROUPS.has(group)) {
+      // Composite GPS coordinates are kept (see KEPT_COMPOSITE_TAGS).
+      if (group !== "Composite" || !KEPT_COMPOSITE_TAGS.has(name)) continue;
+    }
     const value = rest.slice(colon + 1).trim();
     if (!name || !value) continue;
     if (value.startsWith("(Binary data")) continue;
@@ -164,6 +181,44 @@ const api = {
       removedCount: Math.max(0, beforeCount - remaining.length),
       remaining,
     };
+  },
+  /**
+   * Write metadata tags losslessly (no re-encode — only the header
+   * changes), then verify by re-reading. `tags` maps ExifTool tag names
+   * to values, e.g. { "EXIF:Make": "Canon", "EXIF:ISO": 400 }. An empty
+   * string value deletes that tag (`-TAG=`). Returns the edited bytes
+   * plus the verify re-read, so the UI can show the new tag list.
+   */
+  async edit(
+    buffer: ArrayBuffer,
+    filename: string,
+    tags: Record<string, string | number | boolean | (string | number)[]>,
+  ): Promise<{ data: ArrayBuffer; remaining: Tag[]; hasIcc: boolean }> {
+    const file = { name: filename, data: new Uint8Array(buffer) };
+    const edited = await writeMetadata(file, tags, { fetch: wasmFetch });
+    if (!edited.success) {
+      throw new Error(edited.error || "Failed to write metadata");
+    }
+    if (!edited.data) throw new Error("Failed to write metadata");
+    const editedBuffer: ArrayBuffer = edited.data as ArrayBuffer;
+
+    // Verify: re-read the edited file. Trust, but verify.
+    let remaining: Tag[] = [];
+    let hasIcc = false;
+    try {
+      const check = await parseMetadata(
+        { name: filename, data: new Uint8Array(editedBuffer) },
+        { args: READ_ARGS, fetch: wasmFetch },
+      );
+      if (check.success && check.data) {
+        remaining = parseExifToolText(check.data);
+        hasIcc = hasIccProfile(check.data);
+      }
+    } catch {
+      // Verification is best-effort; the edited file is still returned.
+    }
+
+    return { data: editedBuffer, remaining, hasIcc };
   },
 };
 

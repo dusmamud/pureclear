@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CloudArrowUp,
   Trash,
+  PencilSimple,
   DownloadSimple,
   FileArchive,
   ArrowCounterClockwise,
@@ -12,12 +13,14 @@ import {
 import {
   readTags,
   stripFile,
+  editFile,
   disposeEngine,
   warmupEngine,
   type Tag,
 } from "../../lib/engine";
 import { prereadTags } from "../../lib/exifr-preread";
-import { stripPdfMetadata } from "../../lib/pdf";
+import { stripPdfMetadata, editPdfMetadata } from "../../lib/pdf";
+import MetadataEditor, { type EditPayload } from "./MetadataEditor";
 import { zipFiles, downloadBlob } from "../../lib/zip";
 import {
   imageThumbnail,
@@ -54,6 +57,10 @@ export interface FileState {
   hasGps: boolean;
   cleaned?: ArrayBuffer;
   cleanedName: string;
+  /** "strip" = metadata removed, "edit" = metadata edited. */
+  action?: "strip" | "edit";
+  editedCount: number;
+  editedName: string;
   removedCount: number;
   remaining: Tag[];
   errorKey?: string;
@@ -97,6 +104,11 @@ export default function ToolIsland({ locale, messages }: Props) {
   const msg = makeMsg(messages);
   const [files, setFiles] = useState<FileState[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  /** Tool mode: "clean" removes metadata, "edit" lets the user change it. */
+  const [mode, setMode] = useState<"clean" | "edit">("clean");
+  /** Id of the file whose editor panel is open (edit mode only). */
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -206,6 +218,8 @@ export default function ToolIsland({ locale, messages }: Props) {
           hasIcc: false,
           hasGps: false,
           cleanedName: file.name.replace(/(\.[^.]+)?$/, ".clean$1"),
+          editedCount: 0,
+          editedName: file.name.replace(/(\.[^.]+)?$/, ".edited$1"),
           removedCount: 0,
           remaining: [],
           errorKey: isSupported(file.name) ? undefined : "tool.unsupported",
@@ -255,6 +269,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           ) as ArrayBuffer;
           patch(st.id, {
             status: "done",
+            action: "strip",
             cleaned: cleanedBuffer,
             removedCount: st.tags.length,
             remaining: [],
@@ -270,6 +285,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           );
           patch(st.id, {
             status: "done",
+            action: "strip",
             cleaned: data,
             removedCount,
             remaining,
@@ -286,11 +302,73 @@ export default function ToolIsland({ locale, messages }: Props) {
     [patch],
   );
 
+  /** Write edited metadata (edit mode) and verify by re-reading. */
+  const editOne = useCallback(
+    async (st: FileState, payload: EditPayload) => {
+      setSavingEdit(true);
+      try {
+        const buf = (await st.file.arrayBuffer()).slice(0) as ArrayBuffer;
+        if (st.ext === "pdf" && payload.kind === "pdf") {
+          const edited = await editPdfMetadata(buf, payload.fields);
+          const editedBuffer = edited.buffer.slice(
+            edited.byteOffset,
+            edited.byteOffset + edited.byteLength,
+          ) as ArrayBuffer;
+          // Re-read the Info dict so the inspector shows the new values.
+          const { PDFDocument } = await import("pdf-lib");
+          const doc = await PDFDocument.load(editedBuffer, {
+            ignoreEncryption: true,
+          });
+          const info = await readPdfInfo(doc);
+          patch(st.id, {
+            status: "done",
+            action: "edit",
+            cleaned: editedBuffer,
+            editedCount: payload.changedCount,
+            remaining: info,
+            tags: info,
+            hasGps: hasGpsTag(info),
+          });
+        } else if (payload.kind === "exif") {
+          const { data, remaining, hasIcc } = await editFile(
+            buf,
+            st.file.name,
+            payload.tags,
+          );
+          patch(st.id, {
+            status: "done",
+            action: "edit",
+            cleaned: data,
+            editedCount: payload.changedCount,
+            remaining,
+            tags: remaining,
+            hasIcc,
+            hasGps: hasGpsTag(remaining),
+          });
+        }
+        setEditingId(null);
+      } catch (e) {
+        const key =
+          e instanceof Error && e.message === "encrypted"
+            ? "tool.encryptedPdf"
+            : "tool.error";
+        patch(st.id, { status: "error", errorKey: key });
+        setEditingId(null);
+      } finally {
+        setSavingEdit(false);
+      }
+    },
+    [patch],
+  );
+
   const downloadOne = (st: FileState) => {
     if (!st.cleaned) return;
     const type =
       st.ext === "pdf" ? "application/pdf" : "application/octet-stream";
-    downloadBlob(new Blob([st.cleaned], { type }), st.cleanedName);
+    downloadBlob(
+      new Blob([st.cleaned], { type }),
+      st.action === "edit" ? st.editedName : st.cleanedName,
+    );
   };
 
   const downloadAll = () => {
@@ -298,7 +376,7 @@ export default function ToolIsland({ locale, messages }: Props) {
     if (!done.length) return;
     const zipped = zipFiles(
       done.map((f) => ({
-        name: f.cleanedName,
+        name: f.action === "edit" ? f.editedName : f.cleanedName,
         data: new Uint8Array(f.cleaned as ArrayBuffer),
       })),
     );
@@ -311,6 +389,7 @@ export default function ToolIsland({ locale, messages }: Props) {
   const reset = () => {
     for (const f of files) if (f.thumbUrl) URL.revokeObjectURL(f.thumbUrl);
     setFiles([]);
+    setEditingId(null);
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -323,6 +402,50 @@ export default function ToolIsland({ locale, messages }: Props) {
 
   return (
     <div className="contents">
+      {/* Mode tabs: Clean removes metadata, Edit lets the user change it. */}
+      <div className="mb-4 flex justify-center">
+        <div
+          role="tablist"
+          aria-label={msg("tool.modeLabel")}
+          className="inline-flex rounded-pill border border-hairline bg-card p-1 shadow-card"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "clean"}
+            onClick={() => {
+              setMode("clean");
+              setEditingId(null);
+            }}
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+              mode === "clean"
+                ? "bg-accent text-white"
+                : "text-ink-2 hover:text-ink"
+            }`}
+          >
+            <Trash size={16} aria-hidden="true" />
+            {msg("tool.modeClean")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "edit"}
+            onClick={() => {
+              setMode("edit");
+              setEditingId(null);
+            }}
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+              mode === "edit"
+                ? "bg-accent text-white"
+                : "text-ink-2 hover:text-ink"
+            }`}
+          >
+            <PencilSimple size={16} aria-hidden="true" />
+            {msg("tool.modeEdit")}
+          </button>
+        </div>
+      </div>
+
       {/* Dropzone — standalone card (Apple style: generous, calm, inviting) */}
       <div className="overflow-hidden rounded-card border border-hairline bg-card shadow-card">
         <div
@@ -402,7 +525,13 @@ export default function ToolIsland({ locale, messages }: Props) {
                 state={f}
                 msg={msg}
                 locale={locale}
+                mode={mode}
+                editing={editingId === f.id}
+                savingEdit={savingEdit}
                 onStrip={() => stripOne(f)}
+                onEdit={() => setEditingId(f.id)}
+                onSaveEdit={(payload) => editOne(f, payload)}
+                onCancelEdit={() => setEditingId(null)}
                 onDownload={() => downloadOne(f)}
               />
             ))}
@@ -429,13 +558,25 @@ function FileRow({
   state: f,
   msg,
   locale,
+  mode,
+  editing,
+  savingEdit,
   onStrip,
+  onEdit,
+  onSaveEdit,
+  onCancelEdit,
   onDownload,
 }: {
   state: FileState;
   msg: MsgFn;
   locale: Locale;
+  mode: "clean" | "edit";
+  editing: boolean;
+  savingEdit: boolean;
   onStrip: () => void;
+  onEdit: () => void;
+  onSaveEdit: (payload: EditPayload) => void;
+  onCancelEdit: () => void;
   onDownload: () => void;
 }) {
   // Privacy-first report link: only the sanitized reason, extension and
@@ -501,8 +642,10 @@ function FileRow({
           {f.status === "done" && (
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
               <CheckCircle size={16} weight="fill" aria-hidden="true" />
-              {msg("tool.tagsRemoved", { count: f.removedCount })} ·{" "}
-              {msg("tool.tagsRemaining", { count: f.remaining.length })}
+              {f.action === "edit"
+                ? msg("tool.tagsEdited", { count: f.editedCount })
+                : msg("tool.tagsRemoved", { count: f.removedCount })}{" "}
+              · {msg("tool.tagsRemaining", { count: f.remaining.length })}
             </p>
           )}
 
@@ -523,7 +666,8 @@ function FileRow({
         </div>
 
         <div className="flex shrink-0 gap-2">
-          {(f.status === "ready" || f.status === "error") &&
+          {mode === "clean" &&
+            (f.status === "ready" || f.status === "error") &&
             f.status === "ready" && (
               <button
                 type="button"
@@ -534,6 +678,16 @@ function FileRow({
                 {msg("tool.remove")}
               </button>
             )}
+          {mode === "edit" && f.status === "ready" && !editing && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+            >
+              <PencilSimple size={16} aria-hidden="true" />
+              {msg("tool.edit")}
+            </button>
+          )}
           {f.status === "done" && (
             <button
               type="button"
@@ -546,6 +700,18 @@ function FileRow({
           )}
         </div>
       </div>
+
+      {/* Inline editor — edit mode, per file */}
+      {mode === "edit" && editing && f.status === "ready" && (
+        <MetadataEditor
+          tags={f.tags}
+          isPdf={f.ext === "pdf"}
+          msg={msg}
+          saving={savingEdit}
+          onSave={onSaveEdit}
+          onCancel={onCancelEdit}
+        />
+      )}
 
       {/* Tags section — own card below the file header row */}
       {f.status === "ready" && (

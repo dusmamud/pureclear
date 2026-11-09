@@ -75,6 +75,18 @@ export function stripFile(
 }
 
 /**
+ * Write metadata tags losslessly, then verify by re-reading.
+ * `tags` maps ExifTool tag names to values; "" deletes a tag.
+ */
+export function editFile(
+  buffer: ArrayBuffer,
+  filename: string,
+  tags: Record<string, string | number | boolean | (string | number)[]>,
+): Promise<{ data: ArrayBuffer; remaining: Tag[]; hasIcc: boolean }> {
+  return withRecovery((a) => a.edit(buffer, filename, tags));
+}
+
+/**
  * Start loading + booting the WASM engine ahead of first use (file
  * drag-over / dropzone hover). Fire-and-forget: a failed warmup is
  * harmless because the first real call retries through withRecovery.
