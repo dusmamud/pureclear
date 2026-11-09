@@ -224,7 +224,7 @@ export default function MetadataEditor({
             className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={16} aria-hidden="true" />
-            {msg("editor.save")}
+            {msg("editor.savePresetConfirm")}
           </button>
           <button
             type="button"

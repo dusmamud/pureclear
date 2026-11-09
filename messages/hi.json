@@ -325,5 +325,6 @@
   "swap.deletePreset": "Preset delete karo",
   "swap.applyAll": "Sabhi files par lagao",
   "history.undo": "Undo",
-  "viewer.notRemovable": "Yeh tag alag se nahi hata sakte."
+  "viewer.notRemovable": "Yeh tag alag se nahi hata sakte.",
+  "editor.savePresetConfirm": "Preset save karo"
 }

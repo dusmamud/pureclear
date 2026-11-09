@@ -31,7 +31,17 @@ function headline(preset: CameraPreset): string {
   const iso = preset.tags["EXIF:ISO"];
   const f = preset.tags["EXIF:FNumber"];
   const mm = preset.tags["EXIF:FocalLengthIn35mmFormat"];
-  return `ISO ${iso} · f/${f} · ${mm}mm`;
+  const parts: string[] = [];
+  if (iso !== undefined) parts.push(`ISO ${iso}`);
+  if (f !== undefined) parts.push(`f/${f}`);
+  if (mm !== undefined) parts.push(`${mm}mm`);
+  if (parts.length > 0) return parts.join(" · ");
+  // Partial custom preset (e.g. only Make was changed): show its tags
+  // instead of "ISO undefined · f/undefined · undefinedmm".
+  return Object.entries(preset.tags)
+    .slice(0, 2)
+    .map(([k, v]) => `${k.split(":").pop()}: ${v}`)
+    .join(" · ");
 }
 
 export default function PresetPicker({

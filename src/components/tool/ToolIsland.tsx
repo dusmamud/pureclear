@@ -402,6 +402,9 @@ export default function ToolIsland({ locale, messages }: Props) {
             removedCount: st.tags.length,
             remaining: [],
             tags: [],
+            // A strip removes every tag, so the GPS warning must go too.
+            // (The ICC note stays: the profile is kept on purpose.)
+            hasGps: false,
           });
         } else {
           // When the authoritative read already counted this file's tags,
@@ -419,6 +422,8 @@ export default function ToolIsland({ locale, messages }: Props) {
             removedCount,
             remaining,
             tags: remaining,
+            // Same as the PDF branch: a strip removes every tag.
+            hasGps: false,
           });
         }
       } catch (e) {

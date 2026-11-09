@@ -325,5 +325,6 @@
   "swap.deletePreset": "Delete preset",
   "swap.applyAll": "Apply to all files",
   "history.undo": "Undo",
-  "viewer.notRemovable": "This tag can't be removed individually."
+  "viewer.notRemovable": "This tag can't be removed individually.",
+  "editor.savePresetConfirm": "Save preset"
 }
