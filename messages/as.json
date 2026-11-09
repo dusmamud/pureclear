@@ -327,5 +327,14 @@
   "history.undo": "আনডু",
   "viewer.notRemovable": "এই টেগটো অকলশৰীয়াকৈ আঁতৰাব নোৱাৰি।",
   "editor.savePresetConfirm": "প্ৰিছেট সংৰক্ষণ কৰক",
-  "features.proofCaption": "টেগ বাকী আছে"
+  "features.proofCaption": "টেগ বাকী আছে",
+  "how.metaTitle": "কেনেকৈ কাম কৰে — ব্ৰাউজাৰত EXIF, GPS আৰু XMP মেটাডাটা আঁতৰাওক | PureClear",
+  "how.metaDescription": "চাৰিটা stepত PureClear-এ কেনেকৈ ফটো, ভিডিঅ’ আৰু PDFৰ পৰা EXIF, GPS, XMP আৰু IPTC মেটাডাটা আঁতৰায় চাওক — সম্পূৰ্ণ আপোনাৰ ব্ৰাউজাৰত। No uploads, free forever।",
+  "how.faq1q": "কিবা install কৰিব লাগিব নেকি?",
+  "how.faq1a": "নালাগে। PureClear সম্পূৰ্ণ আপোনাৰ ব্ৰাউজাৰতে চলে — ছাইটটো খোলক, ফাইল drop কৰক, হৈ গ’ল। একো download নালাগে, একো install নালাগে।",
+  "how.faq2q": "Cleaningৰ পিছত মোৰ ফাইলবোৰৰ কি হয়?",
+  "how.faq2a": "Clean কৰা ফাইলটো পোনে পোনে আপোনাৰ ডিভাইচত download হয়। একো upload বা store নহয় — আপোনাৰ ফাইলবোৰে আপোনাৰ ব্ৰাউজাৰ কেতিয়াও নেৰে।",
+  "how.faq3q": "মই একেলগে কেইবাটাও ফাইল clean কৰিব পাৰিম নেকি?",
+  "how.faq3a": "পাৰিব। যিমান বিচাৰে ফাইল drop কৰক আৰু আটাইবোৰ একেলগে clean কৰক — বা এটা এটাকৈ clean, edit আৰু swap কৰক।",
+  "how.formatsTitle": "প্ৰতিটো formatতে কাম কৰে"
 }

@@ -327,5 +327,14 @@
   "history.undo": "Undo",
   "viewer.notRemovable": "Yeh tag alag se nahi hata sakte.",
   "editor.savePresetConfirm": "Preset save karo",
-  "features.proofCaption": "tags bache"
+  "features.proofCaption": "tags bache",
+  "how.metaTitle": "Kaise kaam karta hai — Browser me EXIF, GPS aur XMP metadata hatayein | PureClear",
+  "how.metaDescription": "Dekhiye PureClear chaar steps me photos, videos aur PDFs se EXIF, GPS, XMP aur IPTC metadata kaise hatata hai — poora kaam aapke browser me. No uploads, free forever.",
+  "how.faq1q": "Kya kuch install karna padega?",
+  "how.faq1a": "Nahi. PureClear poora aapke browser me chalta hai — site kholo, file drop karo, ho gaya. Kuch download nahi, kuch install nahi.",
+  "how.faq2q": "Cleaning ke baad meri files ka kya hota hai?",
+  "how.faq2a": "Clean ki hui file seedha aapke device par download hoti hai. Kuch upload ya store nahi hota — aapki files aapka browser kabhi nahi chhodti.",
+  "how.faq3q": "Kya main ek saath kai files clean kar sakta hoon?",
+  "how.faq3a": "Haan. Jitni chaaho files drop karo aur sabko ek saath clean karo — ya ek-ek karke clean, edit aur swap karo.",
+  "how.formatsTitle": "Har format par kaam karta hai"
 }

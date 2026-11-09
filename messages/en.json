@@ -327,5 +327,14 @@
   "history.undo": "Undo",
   "viewer.notRemovable": "This tag can't be removed individually.",
   "editor.savePresetConfirm": "Save preset",
-  "features.proofCaption": "tags remaining"
+  "features.proofCaption": "tags remaining",
+  "how.metaTitle": "How it works — Remove EXIF, GPS & XMP metadata | PureClear",
+  "how.metaDescription": "See how PureClear removes EXIF, GPS, XMP and IPTC metadata from photos, videos and PDFs in four steps — entirely in your browser. No uploads, free forever.",
+  "how.faq1q": "Do I need to install anything?",
+  "how.faq1a": "No. PureClear runs entirely in your browser — open the site, drop a file, and you're done. Nothing to download, nothing to install.",
+  "how.faq2q": "What happens to my files after cleaning?",
+  "how.faq2a": "The cleaned file downloads straight to your device. Nothing is uploaded or stored anywhere — your files never leave your browser.",
+  "how.faq3q": "Can I clean several files at once?",
+  "how.faq3a": "Yes. Drop in as many files as you like and clean them all together — or clean, edit and swap metadata file by file.",
+  "how.formatsTitle": "Works on every format"
 }
