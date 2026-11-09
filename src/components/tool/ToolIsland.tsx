@@ -403,6 +403,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           tags: remaining,
           hasIcc,
           hasGps: hasGpsTag(remaining),
+          verifying: false,
         });
         setSwappingId(null);
       } catch (e) {
@@ -850,8 +851,11 @@ function FileRow({
           />
         )}
 
-      {/* Tags section — own card below the file header row */}
-      {f.status === "ready" && (
+      {/* Tags section — own card below the file header row. Shown for
+          ready AND done files: after an edit/swap the user must be able
+          to inspect the new tags without downloading the file first.
+          After a strip it reads "0 tags found", which confirms the clean. */}
+      {(f.status === "ready" || f.status === "done") && (
         <div className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1">
             <p className="text-[13px] font-semibold text-ink">
