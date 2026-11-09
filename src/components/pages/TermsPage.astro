@@ -17,7 +17,7 @@ const sections = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
 
 {/* Hero — Apple style */}
 <section class="mx-auto max-w-6xl px-4 pb-12 pt-16 text-center sm:px-6 sm:pb-16 sm:pt-24">
-  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+  <p class="text-[13px] font-medium text-accent">
     {tr('terms.eyebrow')}
   </p>
   <h1
@@ -67,7 +67,7 @@ const sections = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
       <p class="mx-auto mt-3 max-w-md text-[16px] opacity-70">{tr('terms.ctaBody')}</p>
       <a
         href={localePath(locale, '/contact')}
-        class="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+        class="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-medium text-white transition-[color,background-color,transform] duration-200 hover:bg-accent-hover active:scale-[0.98]"
       >
         {tr('terms.ctaButton')}
       </a>

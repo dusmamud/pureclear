@@ -33,10 +33,10 @@ const cards = [
 ];
 ---
 
-<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+<section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
   {/* Section header — Apple style: eyebrow + massive headline */}
   <div class="mx-auto max-w-3xl text-center">
-    <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+    <p class="text-[13px] font-medium text-accent">
       {tr('features.eyebrow')}
     </p>
     <h2
@@ -51,17 +51,54 @@ const cards = [
 
   <div class="mt-12 grid grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2 lg:grid-cols-4">
     {
-      cards.map((c) => (
-        <article class="group rounded-card bg-card p-7 shadow-card transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 hover:shadow-[0_12px_40px_rgb(0_0_0/0.1)]">
-          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
+      cards.map((c, i) => {
+        const wide = i === 0;
+        const strip = i === 3;
+        const icon = (
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent/10 text-accent">
             <svg class="h-6 w-6" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
               <path d={c.path} />
             </svg>
           </span>
-          <h3 class="mt-5 text-[19px] font-semibold tracking-[-0.01em]">{c.title}</h3>
-          <p class="mt-2 text-[15px] leading-[1.5] text-ink-2">{c.body}</p>
-        </article>
-      ))
+        );
+        return (
+          <article
+            class={`rounded-card bg-card p-7 shadow-card transition-[background-color,box-shadow] duration-200 ease-apple hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] ${
+              wide ? 'sm:col-span-2' : ''
+            } ${strip ? 'sm:col-span-2 lg:col-span-4' : ''}`}
+          >
+            {strip ? (
+              <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-start gap-5">
+                  {icon}
+                  <div>
+                    <h3 class="text-[19px] font-semibold tracking-[-0.01em]">{c.title}</h3>
+                    <p class="mt-2 max-w-md text-[15px] leading-[1.5] text-ink-2">{c.body}</p>
+                  </div>
+                </div>
+                <p class="flex shrink-0 items-baseline gap-2 border-t border-hairline pt-5 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
+                  <span class="font-mono text-[32px] leading-none tabular-nums">0</span>
+                  <span class="text-[13px] text-ink-2">{tr('features.proofCaption')}</span>
+                </p>
+              </div>
+            ) : wide ? (
+              <div class="flex items-start gap-5">
+                {icon}
+                <div>
+                  <h3 class="text-[19px] font-semibold tracking-[-0.01em]">{c.title}</h3>
+                  <p class="mt-2 text-[15px] leading-[1.5] text-ink-2">{c.body}</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {icon}
+                <h3 class="mt-5 text-[19px] font-semibold tracking-[-0.01em]">{c.title}</h3>
+                <p class="mt-2 text-[15px] leading-[1.5] text-ink-2">{c.body}</p>
+              </>
+            )}
+          </article>
+        );
+      })
     }
   </div>
 </section>

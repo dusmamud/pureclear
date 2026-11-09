@@ -21,7 +21,7 @@ const links = [
 ];
 ---
 
-<header class="sticky top-0 z-50 border-b border-hairline bg-[#fafafc] dark:bg-[#08080a]">
+<header class="sticky top-0 z-50 border-b border-hairline glass-header">
   <nav
     class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6"
     aria-label="Primary"
@@ -95,7 +95,7 @@ const links = [
   {/* Mobile menu overlay — full-screen, Apple.com style */}
   <div
     id="mobile-menu"
-    class="invisible fixed inset-0 top-16 z-40 bg-canvas/95 opacity-0 backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden"
+    class="invisible fixed inset-0 top-16 z-40 bg-canvas/95 opacity-0 backdrop-blur-xl transition-opacity duration-200 ease-apple md:hidden"
     aria-hidden="true"
   >
     <nav class="mx-auto max-w-6xl px-6 py-8" aria-label={tr('nav.menu')}>

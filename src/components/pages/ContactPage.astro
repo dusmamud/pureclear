@@ -17,7 +17,7 @@ const topics = [1, 2, 3].map((n) => ({
 
 {/* Hero — Apple style */}
 <section class="mx-auto max-w-6xl px-4 pb-12 pt-16 text-center sm:px-6 sm:pb-16 sm:pt-24">
-  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+  <p class="text-[13px] font-medium text-accent">
     {tr('contact.eyebrow')}
   </p>
   <h1
@@ -35,10 +35,10 @@ const topics = [1, 2, 3].map((n) => ({
   <div class="mx-auto mt-10 max-w-xl sm:mt-12">
     <a
       href="mailto:pureclear@dusrel.com"
-      class="group flex items-center justify-between gap-4 rounded-[24px] bg-card p-6 text-start ring-1 ring-hairline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] sm:p-7"
+      class="group flex items-center justify-between gap-4 rounded-[24px] bg-card p-6 text-start ring-1 ring-hairline transition-[background-color,box-shadow] duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-7"
     >
       <div>
-        <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+        <p class="text-[13px] font-medium text-accent">
           {tr('contact.emailLabel')}
         </p>
         <p class="mt-2 text-[20px] font-semibold tracking-[-0.01em] sm:text-[24px]">
@@ -46,7 +46,7 @@ const topics = [1, 2, 3].map((n) => ({
         </p>
       </div>
       <span
-        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent transition-all duration-300 group-hover:bg-accent group-hover:text-white"
+        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
       >
         <svg
           class="h-5 w-5"
@@ -93,7 +93,7 @@ const topics = [1, 2, 3].map((n) => ({
     <div class="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2">
       <a
         href={localePath(locale, '/report')}
-        class="group rounded-[24px] bg-card p-6 ring-1 ring-hairline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] sm:p-8"
+        class="group rounded-[24px] bg-card p-6 ring-1 ring-hairline transition-[background-color,box-shadow] duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-8"
       >
         <h3 class="text-[20px] font-semibold tracking-[-0.01em]">
           {tr('contact.reportCardTitle')}
@@ -110,7 +110,7 @@ const topics = [1, 2, 3].map((n) => ({
       </a>
       <a
         href={localePath(locale, '/feedback')}
-        class="group rounded-[24px] bg-card p-6 ring-1 ring-hairline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] sm:p-8"
+        class="group rounded-[24px] bg-card p-6 ring-1 ring-hairline transition-[background-color,box-shadow] duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-8"
       >
         <h3 class="text-[20px] font-semibold tracking-[-0.01em]">
           {tr('contact.feedbackCardTitle')}
@@ -131,7 +131,7 @@ const topics = [1, 2, 3].map((n) => ({
     <div class="mt-16 text-center">
       <a
         href={localePath(locale, '/')}
-        class="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+        class="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[16px] font-medium text-white transition-[color,background-color,transform] duration-200 hover:bg-accent-hover active:scale-[0.98]"
       >
         {tr('contact.ctaButton')}
       </a>

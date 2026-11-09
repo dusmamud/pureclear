@@ -64,13 +64,13 @@ function TagTable({
               )}
               <th
                 scope="col"
-                className="w-2/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                className="w-2/5 px-3 py-2 text-[11px] font-medium text-ink-2"
               >
                 {msg("inspector.tag")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                className="px-3 py-2 text-[11px] font-medium text-ink-2"
               >
                 {msg("inspector.value")}
               </th>
@@ -86,7 +86,7 @@ function TagTable({
                   className={i % 2 === 1 ? "bg-canvas/60" : "bg-card"}
                 >
                   {selectable && (
-                    <td className="w-10 px-2 py-[7px] align-top">
+                    <td className="w-10 px-2 py-2 align-top">
                       <input
                         type="checkbox"
                         checked={selected?.has(key) ?? false}
@@ -100,7 +100,7 @@ function TagTable({
                       />
                     </td>
                   )}
-                  <td className="px-3 py-[7px] align-top">
+                  <td className="px-3 py-2 align-top">
                     <span className="block font-medium leading-snug text-ink">
                       {tag.name}
                     </span>
@@ -108,7 +108,7 @@ function TagTable({
                       {displayGroup(tag)}
                     </span>
                   </td>
-                  <td className="max-w-0 px-3 py-[7px] align-top">
+                  <td className="max-w-0 px-3 py-2 align-top">
                     <span
                       className="block truncate text-[13px] leading-snug text-ink-2"
                       title={tag.value}

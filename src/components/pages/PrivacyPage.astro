@@ -17,7 +17,7 @@ const sections = [1, 2, 3, 4, 5].map((n) => ({
 
 {/* Hero — Apple style with product visual */}
 <section class="mx-auto max-w-6xl px-4 pb-12 pt-16 text-center sm:px-6 sm:pb-16 sm:pt-24">
-  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+  <p class="text-[13px] font-medium text-accent">
     {tr('privacy.eyebrow')}
   </p>
   <h1
@@ -85,7 +85,7 @@ const sections = [1, 2, 3, 4, 5].map((n) => ({
   </p>
   <a
     href={localePath(locale, '/')}
-    class="mt-8 inline-flex items-center justify-center rounded-pill bg-accent px-8 py-3.5 text-[17px] font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+    class="mt-8 inline-flex items-center justify-center rounded-pill bg-accent px-8 py-3.5 text-[17px] font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97]"
   >
     {tr('privacy.ctaButton')}
   </a>

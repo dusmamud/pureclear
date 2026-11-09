@@ -326,5 +326,6 @@
   "swap.applyAll": "সকলো ফাইলত প্ৰয়োগ কৰক",
   "history.undo": "আনডু",
   "viewer.notRemovable": "এই টেগটো অকলশৰীয়াকৈ আঁতৰাব নোৱাৰি।",
-  "editor.savePresetConfirm": "প্ৰিছেট সংৰক্ষণ কৰক"
+  "editor.savePresetConfirm": "প্ৰিছেট সংৰক্ষণ কৰক",
+  "features.proofCaption": "টেগ বাকী আছে"
 }

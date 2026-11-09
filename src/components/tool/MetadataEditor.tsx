@@ -137,7 +137,7 @@ export default function MetadataEditor({
           type="button"
           onClick={onCancel}
           aria-label={msg("editor.cancel")}
-          className="shrink-0 rounded-full p-1.5 text-ink-2 transition-all hover:bg-black/[0.04] hover:text-ink active:scale-95 dark:hover:bg-white/[0.06]"
+          className="shrink-0 rounded-full p-1.5 text-ink-2 transition-[color,background-color,transform] duration-200 hover:bg-black/[0.04] hover:text-ink active:scale-95 dark:hover:bg-white/[0.06]"
         >
           <X size={16} aria-hidden="true" />
         </button>
@@ -145,7 +145,7 @@ export default function MetadataEditor({
 
       {visibleGroups.map((group) => (
         <fieldset key={group.id} className="mt-4">
-          <legend className="px-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2">
+          <legend className="px-1 text-[11px] font-medium text-ink-2">
             {msg(group.labelKey)}
           </legend>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -157,7 +157,7 @@ export default function MetadataEditor({
                 const err = changedIds.has(field.id)
                   ? errors[field.id]
                   : undefined;
-                const inputCls = `w-full rounded-xl border bg-card px-3 py-2 text-sm text-ink outline-none transition-all placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 ${
+                const inputCls = `w-full rounded-xl border bg-card px-3 py-2 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 ${
                   err ? "border-red-500/60" : "border-hairline"
                 }`;
                 return (
@@ -215,13 +215,13 @@ export default function MetadataEditor({
             placeholder={msg("editor.presetName")}
             aria-label={msg("editor.presetName")}
             autoFocus
-            className="w-full rounded-xl border border-hairline bg-card px-3 py-2.5 text-sm text-ink outline-none transition-all placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 sm:w-64"
+            className="w-full rounded-xl border border-hairline bg-card px-3 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 sm:w-64"
           />
           <button
             type="button"
             onClick={confirmSavePreset}
             disabled={!presetName.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={16} aria-hidden="true" />
             {msg("editor.savePresetConfirm")}
@@ -232,7 +232,7 @@ export default function MetadataEditor({
               setNamingPreset(false);
               setPresetName("");
             }}
-            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97]"
           >
             {msg("editor.cancel")}
           </button>
@@ -252,7 +252,7 @@ export default function MetadataEditor({
                 setPresetSaved(false);
               }}
               disabled={!canSave}
-              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {msg("editor.savePreset")}
             </button>
@@ -262,7 +262,7 @@ export default function MetadataEditor({
               type="button"
               onClick={saveAll}
               disabled={!canSave}
-              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {msg("editor.saveAll")}
             </button>
@@ -270,7 +270,7 @@ export default function MetadataEditor({
           <button
             type="button"
             onClick={onCancel}
-            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+            className="inline-flex items-center justify-center gap-2 rounded-pill border border-hairline bg-card px-5 py-2.5 text-sm font-medium text-ink transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97]"
           >
             {msg("editor.cancel")}
           </button>
@@ -278,7 +278,7 @@ export default function MetadataEditor({
             type="button"
             onClick={save}
             disabled={!canSave}
-            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Check size={16} aria-hidden="true" />
             {saving ? msg("editor.saving") : msg("editor.save")}

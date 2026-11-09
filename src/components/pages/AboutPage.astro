@@ -22,7 +22,7 @@ const principles = [1, 2, 3, 4].map((n) => ({
 
 {/* Hero — Apple style: eyebrow, massive title, intro */}
 <section class="mx-auto max-w-6xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-24 sm:pt-24">
-  <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+  <p class="text-[13px] font-medium text-accent">
     {tr('about.eyebrow')}
   </p>
   <h1
@@ -41,7 +41,7 @@ const principles = [1, 2, 3, 4].map((n) => ({
 <section class="border-t border-hairline bg-card/40">
   <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
     <div class="mx-auto max-w-3xl text-center">
-      <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+      <p class="text-[13px] font-medium text-accent">
         {tr('about.problemEyebrow')}
       </p>
       <h2
@@ -56,7 +56,7 @@ const principles = [1, 2, 3, 4].map((n) => ({
     <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:mt-16 md:grid-cols-3">
       {
         problems.map((p) => (
-          <article class="rounded-card bg-card p-8 shadow-card transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0_0_0/0.1)]">
+          <article class="rounded-card bg-card p-8 shadow-card transition-[background-color,box-shadow] duration-200 ease-apple hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
             <h3 class="text-[19px] font-semibold tracking-[-0.01em]">{p.title}</h3>
             <p class="mt-2.5 text-[15px] leading-[1.6] text-ink-2">{p.body}</p>
           </article>
@@ -69,7 +69,7 @@ const principles = [1, 2, 3, 4].map((n) => ({
 {/* Principles — Apple style: 2x2 grid */}
 <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
   <div class="mx-auto max-w-3xl text-center">
-    <p class="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent">
+    <p class="text-[13px] font-medium text-accent">
       {tr('about.principlesEyebrow')}
     </p>
     <h2
@@ -80,14 +80,8 @@ const principles = [1, 2, 3, 4].map((n) => ({
   </div>
   <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:mt-16 sm:grid-cols-2">
     {
-      principles.map((p, i) => (
-        <article class="group relative overflow-hidden rounded-card bg-card p-8 shadow-card transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(0_0_0/0.1)]">
-          <span
-            class="pointer-events-none absolute -right-2 -top-7 select-none text-[110px] font-bold leading-none tracking-tighter text-accent/[0.07]"
-            aria-hidden="true"
-          >
-            {i + 1}
-          </span>
+      principles.map((p) => (
+        <article class="rounded-card bg-card p-8 shadow-card transition-[background-color,box-shadow] duration-200 ease-apple hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
           <h3 class="text-[21px] font-semibold tracking-[-0.01em]">{p.title}</h3>
           <p class="mt-2.5 text-[16px] leading-[1.6] text-ink-2">{p.body}</p>
         </article>
@@ -109,7 +103,7 @@ const principles = [1, 2, 3, 4].map((n) => ({
     </p>
     <a
       href={localePath(locale, '/')}
-      class="mt-8 inline-flex items-center justify-center rounded-pill bg-accent px-8 py-3.5 text-[17px] font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+      class="mt-8 inline-flex items-center justify-center rounded-pill bg-accent px-8 py-3.5 text-[17px] font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97]"
     >
       {tr('about.ctaButton')}
     </a>

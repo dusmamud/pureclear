@@ -699,7 +699,7 @@ export default function ToolIsland({ locale, messages }: Props) {
               setEditingId(null);
               setSwappingId(null);
             }}
-            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.97] ${
               mode === "clean"
                 ? "bg-accent text-white"
                 : "text-ink-2 hover:text-ink"
@@ -717,7 +717,7 @@ export default function ToolIsland({ locale, messages }: Props) {
               setEditingId(null);
               setSwappingId(null);
             }}
-            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.97] ${
               mode === "edit"
                 ? "bg-accent text-white"
                 : "text-ink-2 hover:text-ink"
@@ -735,7 +735,7 @@ export default function ToolIsland({ locale, messages }: Props) {
               setEditingId(null);
               setSwappingId(null);
             }}
-            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-all duration-300 active:scale-[0.97] ${
+            className={`inline-flex items-center gap-2 rounded-pill px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 active:scale-[0.97] ${
               mode === "swap"
                 ? "bg-accent text-white"
                 : "text-ink-2 hover:text-ink"
@@ -764,14 +764,14 @@ export default function ToolIsland({ locale, messages }: Props) {
           onPointerEnter={() => warmupEngine()}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
-          className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] sm:py-16 ${
+          className={`flex cursor-pointer flex-col items-center justify-center gap-4 px-6 py-14 text-center transition-[background-color,transform] duration-200 ease-apple sm:py-16 ${
             dragOver
               ? "scale-[1.01] bg-accent/[0.08]"
               : "hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
           }`}
         >
           <span
-            className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`flex h-16 w-16 items-center justify-center rounded-[20px] bg-accent/10 text-accent transition-transform duration-200 ease-apple ${
               dragOver ? "scale-110" : ""
             }`}
           >
@@ -817,7 +817,7 @@ export default function ToolIsland({ locale, messages }: Props) {
                     type="button"
                     onClick={cleanAll}
                     disabled={batchProgress !== null}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Trash size={16} aria-hidden="true" />
                     {msg("tool.cleanAll")}
@@ -826,7 +826,7 @@ export default function ToolIsland({ locale, messages }: Props) {
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-all duration-300 hover:opacity-70 active:scale-[0.97]"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-accent transition-[color,background-color,opacity,transform] duration-200 hover:opacity-70 active:scale-[0.97]"
               >
                 <ArrowCounterClockwise size={16} aria-hidden="true" />
                 {msg("tool.reset")}
@@ -888,7 +888,7 @@ export default function ToolIsland({ locale, messages }: Props) {
               <button
                 type="button"
                 onClick={downloadAll}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto sm:justify-start"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] sm:w-auto sm:justify-start"
               >
                 <FileArchive size={18} aria-hidden="true" />
                 {msg("tool.downloadAll")}
@@ -1091,7 +1091,7 @@ function FileRow({
               <button
                 type="button"
                 onClick={onStrip}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
               >
                 <Trash size={16} aria-hidden="true" />
                 {msg("tool.remove")}
@@ -1109,7 +1109,7 @@ function FileRow({
                     ? undefined
                     : msg("editor.waitingRead")
                 }
-                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 <PencilSimple size={16} aria-hidden="true" />
                 {msg("tool.edit")}
@@ -1122,7 +1122,7 @@ function FileRow({
               <button
                 type="button"
                 onClick={onSwap}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
               >
                 <ArrowsLeftRight size={16} aria-hidden="true" />
                 {msg("tool.swap")}
@@ -1132,7 +1132,7 @@ function FileRow({
             <button
               type="button"
               onClick={onDownload}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] sm:w-auto"
             >
               <DownloadSimple size={16} aria-hidden="true" />
               {msg("tool.download")}
@@ -1143,7 +1143,7 @@ function FileRow({
               type="button"
               onClick={onUndo}
               title={msg("history.undo")}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-2 transition-all duration-300 hover:bg-black/[0.04] hover:text-ink active:scale-[0.97] dark:hover:bg-white/[0.06]"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-ink-2 transition-[color,background-color,transform] duration-200 hover:bg-black/[0.04] hover:text-ink active:scale-[0.97] dark:hover:bg-white/[0.06]"
             >
               <ArrowCounterClockwise size={16} aria-hidden="true" />
               {msg("history.undo")} {msg(lastHistory.labelKey)}

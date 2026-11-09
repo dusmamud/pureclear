@@ -12,9 +12,9 @@ const tr = t(locale);
   description={tr('notFound.body')}
   path="/404"
 >
-  <section class="mx-auto max-w-2xl px-4 py-28 text-center sm:px-6 sm:py-36">
+  <section class="mx-auto flex min-h-[62vh] max-w-2xl flex-col items-center justify-center px-4 py-20 text-center sm:px-6">
     <p
-      class="bg-gradient-to-b from-ink to-ink-2 bg-clip-text text-[88px] font-semibold leading-none tracking-[-0.03em] text-transparent sm:text-[120px]"
+      class="text-[88px] font-semibold leading-none tracking-[-0.03em] text-ink sm:text-[120px]"
       aria-hidden="true"
     >
       404
@@ -25,7 +25,7 @@ const tr = t(locale);
     </p>
     <a
       href="/"
-      class="mt-10 inline-flex items-center gap-2 rounded-pill bg-accent px-7 py-3 text-[15px] font-medium text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-hover active:scale-[0.97]"
+      class="mt-10 inline-flex items-center gap-2 rounded-pill bg-accent px-7 py-3 text-[15px] font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97]"
     >
       {tr('notFound.cta')}
       <svg

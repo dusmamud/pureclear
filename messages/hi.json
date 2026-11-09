@@ -326,5 +326,6 @@
   "swap.applyAll": "Sabhi files par lagao",
   "history.undo": "Undo",
   "viewer.notRemovable": "Yeh tag alag se nahi hata sakte.",
-  "editor.savePresetConfirm": "Preset save karo"
+  "editor.savePresetConfirm": "Preset save karo",
+  "features.proofCaption": "tags bache"
 }

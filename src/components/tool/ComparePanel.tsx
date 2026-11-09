@@ -61,13 +61,13 @@ export default function ComparePanel({
             <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
               <th
                 scope="col"
-                className="w-1/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2 sm:px-4"
+                className="w-1/4 px-3 py-2 text-[11px] font-medium text-ink-2 sm:px-4"
               >
                 {msg("inspector.tag")}
               </th>
               <th
                 scope="col"
-                className="w-[37%] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
               >
                 <span className="block truncate" title={aName}>
                   {aName}
@@ -75,7 +75,7 @@ export default function ComparePanel({
               </th>
               <th
                 scope="col"
-                className="w-[37%] px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-2"
+                className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
               >
                 <span className="block truncate" title={bName}>
                   {bName}
@@ -95,7 +95,7 @@ export default function ComparePanel({
                       : "bg-card"
                 }
               >
-                <td className="px-3 py-[7px] align-top sm:px-4">
+                <td className="px-3 py-2 align-top sm:px-4">
                   <span className="block font-medium leading-snug text-ink">
                     {row.name}
                   </span>
@@ -103,7 +103,7 @@ export default function ComparePanel({
                     {row.group}
                   </span>
                 </td>
-                <td className="max-w-0 px-3 py-[7px] align-top">
+                <td className="max-w-0 px-3 py-2 align-top">
                   <span
                     className="block truncate text-[13px] leading-snug text-ink-2"
                     title={row.aValue ?? undefined}
@@ -111,7 +111,7 @@ export default function ComparePanel({
                     {row.aValue ?? "—"}
                   </span>
                 </td>
-                <td className="max-w-0 px-3 py-[7px] align-top">
+                <td className="max-w-0 px-3 py-2 align-top">
                   <span
                     className="block truncate text-[13px] leading-snug text-ink-2"
                     title={row.bValue ?? undefined}
