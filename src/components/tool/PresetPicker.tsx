@@ -101,12 +101,18 @@ export default function PresetPicker({
       const data: unknown = JSON.parse(await file.text());
       const { imported, errors } = importPresetPack(data);
       setCustom(loadCustomPresets());
-      setImportNote(
-        imported > 0
-          ? msg("swap.imported", { count: imported })
-          : msg("swap.importInvalid"),
-      );
-      if (errors.length > 0 && imported === 0) setCustom(loadCustomPresets());
+      if (imported > 0 && errors.length > 0) {
+        setImportNote(
+          msg("swap.importedSkipped", {
+            imported,
+            skipped: errors.length,
+          }),
+        );
+      } else if (imported > 0) {
+        setImportNote(msg("swap.imported", { count: imported }));
+      } else {
+        setImportNote(msg("swap.importInvalid"));
+      }
     } catch {
       setImportNote(msg("swap.importInvalid"));
     }

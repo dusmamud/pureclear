@@ -42,4 +42,23 @@ describe("custom presets", () => {
     expect(errors.length).toBe(4);
     expect(validatePresetPack({ nope: true }).errors).toEqual(["not-an-array"]);
   });
+
+  it("replaces a preset saved under an existing name instead of duplicating", () => {
+    const before = loadCustomPresets().length;
+    saveCustomPreset("Dedupe Me", { "EXIF:Make": "Canon" });
+    saveCustomPreset("Dedupe Me", { "EXIF:Make": "Nikon" });
+    const all = loadCustomPresets();
+    expect(all.length).toBe(before + 1);
+    expect(all[all.length - 1].tags["EXIF:Make"]).toBe("Nikon");
+  });
+
+  it("re-importing an exported pack does not duplicate presets", () => {
+    saveCustomPreset("Pack Dupe", { "EXIF:Make": "Sony" });
+    const before = loadCustomPresets().length;
+    const pack = exportPresetPack(loadCustomPresets());
+    const { imported, errors } = importPresetPack(JSON.parse(pack));
+    expect(errors).toEqual([]);
+    expect(imported).toBeGreaterThanOrEqual(1);
+    expect(loadCustomPresets().length).toBe(before);
+  });
 });

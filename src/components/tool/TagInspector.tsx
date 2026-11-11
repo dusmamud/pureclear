@@ -79,7 +79,10 @@ function TagTable({
           <tbody className="divide-y divide-hairline">
             {tags.slice(0, 100).map((tag, i) => {
               const removable = tagDeleteKey(tag) !== null;
-              const key = `${tag.group}|${tag.name}`;
+              // Same stable key as the selection state in ToolIsland:
+              // the canonical delete key survives the preview →
+              // authoritative rename, so a checked box stays checked.
+              const key = tagDeleteKey(tag) ?? `${tag.group}|${tag.name}`;
               return (
                 <tr
                   key={i}
@@ -122,6 +125,11 @@ function TagTable({
           </tbody>
         </table>
       </div>
+      {tags.length > 100 && (
+        <p className="border-t border-hairline px-3 py-2 text-xs text-ink-2">
+          {msg("viewer.showingFirst", { count: tags.length })}
+        </p>
+      )}
     </div>
   );
 }
@@ -146,7 +154,11 @@ export default function TagInspector({
   const groups = useMemo(() => groupTags(tags), [tags]);
   const filtered = useMemo(() => {
     const byQuery = filterTags(tags, query);
-    return group === "all" ? byQuery : byQuery.filter((t) => t.group === group);
+    // Filter by display group, not the raw ExifTool group: GPS tags live
+    // in EXIF/Composite but render under the virtual "GPS" group.
+    return group === "all"
+      ? byQuery
+      : byQuery.filter((t) => displayGroup(t) === group);
   }, [tags, query, group]);
   const filtering = query.trim() !== "" || group !== "all";
 

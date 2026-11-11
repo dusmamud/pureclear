@@ -56,73 +56,79 @@ export default function ComparePanel({
         </button>
       </div>
       <div className="max-h-96 overflow-auto">
-        <table className="w-full text-[13px]">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
-              <th
-                scope="col"
-                className="w-1/4 px-3 py-2 text-[11px] font-medium text-ink-2 sm:px-4"
-              >
-                {msg("inspector.tag")}
-              </th>
-              <th
-                scope="col"
-                className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
-              >
-                <span className="block truncate" title={aName}>
-                  {aName}
-                </span>
-              </th>
-              <th
-                scope="col"
-                className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
-              >
-                <span className="block truncate" title={bName}>
-                  {bName}
-                </span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-hairline">
-            {rows.map((row) => (
-              <tr
-                key={row.key}
-                className={
-                  row.status === "different"
-                    ? "bg-amber-500/10"
-                    : row.status === "onlyA" || row.status === "onlyB"
-                      ? "bg-blue-500/5"
-                      : "bg-card"
-                }
-              >
-                <td className="px-3 py-2 align-top sm:px-4">
-                  <span className="block font-medium leading-snug text-ink">
-                    {row.name}
+        {rows.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm text-ink-2">
+            {msg("compare.empty")}
+          </p>
+        ) : (
+          <table className="w-full text-[13px]">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-canvas text-left shadow-[0_1px_0_var(--color-hairline)]">
+                <th
+                  scope="col"
+                  className="w-1/4 px-3 py-2 text-[11px] font-medium text-ink-2 sm:px-4"
+                >
+                  {msg("inspector.tag")}
+                </th>
+                <th
+                  scope="col"
+                  className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
+                >
+                  <span className="block truncate" title={aName}>
+                    {aName}
                   </span>
-                  <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
-                    {row.group}
+                </th>
+                <th
+                  scope="col"
+                  className="w-[37%] px-3 py-2 text-[11px] font-medium text-ink-2"
+                >
+                  <span className="block truncate" title={bName}>
+                    {bName}
                   </span>
-                </td>
-                <td className="max-w-0 px-3 py-2 align-top">
-                  <span
-                    className="block truncate text-[13px] leading-snug text-ink-2"
-                    title={row.aValue ?? undefined}
-                  >
-                    {row.aValue ?? "—"}
-                  </span>
-                </td>
-                <td className="max-w-0 px-3 py-2 align-top">
-                  <span
-                    className="block truncate text-[13px] leading-snug text-ink-2"
-                    title={row.bValue ?? undefined}
-                  >
-                    {row.bValue ?? "—"}
-                  </span>
-                </td>
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-hairline">
+              {rows.map((row) => (
+                <tr
+                  key={row.key}
+                  className={
+                    row.status === "different"
+                      ? "bg-amber-500/10"
+                      : row.status === "onlyA" || row.status === "onlyB"
+                        ? "bg-blue-500/5"
+                        : "bg-card"
+                  }
+                >
+                  <td className="px-3 py-2 align-top sm:px-4">
+                    <span className="block font-medium leading-snug text-ink">
+                      {row.name}
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-tight text-ink-2">
+                      {row.group}
+                    </span>
+                  </td>
+                  <td className="max-w-0 px-3 py-2 align-top">
+                    <span
+                      className="block truncate text-[13px] leading-snug text-ink-2"
+                      title={row.aValue ?? undefined}
+                    >
+                      {row.aValue ?? "—"}
+                    </span>
+                  </td>
+                  <td className="max-w-0 px-3 py-2 align-top">
+                    <span
+                      className="block truncate text-[13px] leading-snug text-ink-2"
+                      title={row.bValue ?? undefined}
+                    >
+                      {row.bValue ?? "—"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </section>
   );

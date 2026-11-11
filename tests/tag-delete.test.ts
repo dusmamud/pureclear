@@ -57,4 +57,23 @@ describe("tagDeleteKey", () => {
       ]),
     ).toEqual(["EXIF:Make", "EXIF:GPSLatitude"]);
   });
+
+  it("preview and authoritative names map to the same delete key", () => {
+    // Selection is keyed by delete key so a checked box survives the
+    // preview → authoritative rename (F-07): exifr "Model" and ExifTool
+    // "Camera Model Name" must be the same key, likewise the GPS and
+    // spaced names.
+    const pairs: [Tag, Tag][] = [
+      [T("EXIF", "Model"), T("EXIF", "Camera Model Name")],
+      [T("GPS", "GPSLatitudeRef"), T("EXIF", "GPS Latitude Ref")],
+      [T("GPS", "GPSLatitude"), T("Composite", "GPS Latitude")],
+      [T("EXIF", "FNumber"), T("EXIF", "F Number")],
+      [T("EXIF", "FocalLength"), T("EXIF", "Focal Length")],
+      [T("EXIF", "LensModel"), T("EXIF", "Lens Model")],
+    ];
+    for (const [preview, authoritative] of pairs) {
+      expect(tagDeleteKey(preview)).not.toBeNull();
+      expect(tagDeleteKey(preview)).toBe(tagDeleteKey(authoritative));
+    }
+  });
 });

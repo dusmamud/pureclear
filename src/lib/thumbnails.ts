@@ -110,8 +110,17 @@ export async function videoThumbnail(file: File): Promise<string> {
       video.src = url;
     });
     video.currentTime = Math.min(0.5, (video.duration || 1) / 2);
-    await new Promise<void>((resolve) => {
-      video.onseeked = () => resolve();
+    // A seek that never fires must not hang forever: time out after 5 s.
+    // The source object URL is revoked by the outer finally on all paths.
+    await new Promise<void>((resolve, reject) => {
+      const timer = window.setTimeout(
+        () => reject(new Error("video seek timed out")),
+        5000,
+      );
+      video.onseeked = () => {
+        window.clearTimeout(timer);
+        resolve();
+      };
     });
     const blob = await canvasThumb(video, video.videoWidth, video.videoHeight);
     return URL.createObjectURL(blob);

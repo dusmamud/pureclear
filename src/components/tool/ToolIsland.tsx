@@ -21,7 +21,7 @@ import {
   warmupEngine,
   type Tag,
 } from "../../lib/engine";
-import { deleteKeysFor } from "../../lib/tag-delete";
+import { deleteKeysFor, tagDeleteKey } from "../../lib/tag-delete";
 import { saveCustomPreset } from "../../lib/custom-presets";
 import type { ExifTags } from "../../lib/metadata-editor";
 import { prereadTags } from "../../lib/exifr-preread";
@@ -210,28 +210,52 @@ export default function ToolIsland({ locale, messages }: Props) {
         const hasIcc = result.hasIcc;
         // Guarded: never resurrect a file the user already stripped.
         setFiles((fs) =>
-          fs.map((f) =>
-            f.id === state.id &&
-            (f.status === "reading" || f.status === "ready")
-              ? {
-                  ...f,
-                  status: "ready" as const,
-                  tags,
-                  hasGps: hasGpsTag(tags),
-                  verifying: false,
-                  authoritative: true,
-                  hasIcc,
-                }
-              : f,
-          ),
+          fs.map((f) => {
+            if (
+              f.id !== state.id ||
+              (f.status !== "reading" && f.status !== "ready")
+            )
+              return f;
+            // The engine reports success even for files it cannot parse
+            // (e.g. plain text named .jpg): zero tags means there is no
+            // readable metadata, so don't present the file as ready.
+            if (tags.length === 0)
+              return {
+                ...f,
+                status: "error" as const,
+                errorKey: "tool.noMetadata",
+                tags: [],
+                hasGps: false,
+                verifying: false,
+                authoritative: true,
+                hasIcc,
+              };
+            return {
+              ...f,
+              status: "ready" as const,
+              tags,
+              hasGps: hasGpsTag(tags),
+              verifying: false,
+              authoritative: true,
+              hasIcc,
+            };
+          }),
         );
-      } catch {
+      } catch (e) {
+        // A PDF that fails to load is usually encrypted; surface that
+        // distinctly instead of the generic error (same mapping as
+        // strip/edit/swap).
+        const key =
+          e instanceof Error &&
+          (e.message === "encrypted" || /encrypt/i.test(e.message))
+            ? "tool.encryptedPdf"
+            : "tool.error";
         if (previewShown) {
           // Preview is on screen; the strip path re-reads inside the
           // worker anyway, so a failed background read is not fatal.
           patch(state.id, { verifying: false });
         } else {
-          patch(state.id, { status: "error", errorKey: "tool.error" });
+          patch(state.id, { status: "error", errorKey: key });
         }
       }
     },
@@ -362,6 +386,9 @@ export default function ToolIsland({ locale, messages }: Props) {
     total: number;
   } | null>(null);
 
+  /** Set by reset() so a batch in flight stops after the current file. */
+  const batchCancelRef = useRef(false);
+
   /** Run one action over many files, sequentially, with progress. */
   const runBatch = useCallback(
     async (
@@ -369,8 +396,10 @@ export default function ToolIsland({ locale, messages }: Props) {
       fn: (f: FileState) => Promise<void>,
     ): Promise<void> => {
       if (targets.length === 0 || batchProgress) return;
+      batchCancelRef.current = false;
       setBatchProgress({ done: 0, total: targets.length });
       for (const [i, f] of targets.entries()) {
+        if (batchCancelRef.current) break;
         // Per-file errors already surface as error status inside fn.
         await fn(f);
         setBatchProgress({ done: i + 1, total: targets.length });
@@ -388,7 +417,6 @@ export default function ToolIsland({ locale, messages }: Props) {
         // is the file now — stripping the original would lose the edit.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
-        pushHistory(st, buf, "tool.modeClean");
         if (st.ext === "pdf") {
           const cleaned = await stripPdfMetadata(buf);
           const cleanedBuffer = cleaned.buffer.slice(
@@ -405,6 +433,11 @@ export default function ToolIsland({ locale, messages }: Props) {
             // A strip removes every tag, so the GPS warning must go too.
             // (The ICC note stays: the profile is kept on purpose.)
             hasGps: false,
+            verifying: false,
+            // The post-strip tags are the worker's verify re-read, so
+            // they are authoritative even when the initial read never
+            // landed (strip clicked during verifying).
+            authoritative: true,
           });
         } else {
           // When the authoritative read already counted this file's tags,
@@ -424,8 +457,13 @@ export default function ToolIsland({ locale, messages }: Props) {
             tags: remaining,
             // Same as the PDF branch: a strip removes every tag.
             hasGps: false,
+            verifying: false,
+            authoritative: true,
           });
         }
+        // History only after success: a failed strip must not leave an
+        // orphan undo entry behind.
+        pushHistory(st, buf, "tool.modeClean");
       } catch (e) {
         const key =
           e instanceof Error && e.message === "encrypted"
@@ -446,7 +484,7 @@ export default function ToolIsland({ locale, messages }: Props) {
         // first edit's output, it does not silently revert it.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
-        pushHistory(st, buf, "tool.modeEdit");
+        let applied = false;
         if (st.ext === "pdf" && payload.kind === "pdf") {
           const edited = await editPdfMetadata(buf, payload.fields);
           const editedBuffer = edited.buffer.slice(
@@ -467,7 +505,10 @@ export default function ToolIsland({ locale, messages }: Props) {
             remaining: info,
             tags: info,
             hasGps: hasGpsTag(info),
+            verifying: false,
+            authoritative: true,
           });
+          applied = true;
         } else if (payload.kind === "exif") {
           const { data, remaining, hasIcc } = await editFile(
             buf,
@@ -483,8 +524,14 @@ export default function ToolIsland({ locale, messages }: Props) {
             tags: remaining,
             hasIcc,
             hasGps: hasGpsTag(remaining),
+            verifying: false,
+            authoritative: true,
           });
+          applied = true;
         }
+        // History only after success: a failed edit must not leave an
+        // orphan undo entry behind.
+        if (applied) pushHistory(st, buf, "tool.modeEdit");
         setEditingId(null);
       } catch (e) {
         const key =
@@ -509,7 +556,6 @@ export default function ToolIsland({ locale, messages }: Props) {
         // builds on the edited output, it does not silently revert it.
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
-        pushHistory(st, buf, "tool.modeSwap");
         const { data, writtenCount, remaining, hasIcc } = await swapFile(
           buf,
           st.file.name,
@@ -525,7 +571,10 @@ export default function ToolIsland({ locale, messages }: Props) {
           hasIcc,
           hasGps: hasGpsTag(remaining),
           verifying: false,
+          authoritative: true,
         });
+        // History only after success (see stripOne).
+        pushHistory(st, buf, "tool.modeSwap");
         setSwappingId(null);
       } catch (e) {
         const key =
@@ -552,12 +601,13 @@ export default function ToolIsland({ locale, messages }: Props) {
       try {
         const buf =
           st.cleaned ?? ((await st.file.arrayBuffer()).slice(0) as ArrayBuffer);
-        pushHistory(st, buf, "tool.removeSelected");
         const { data, removedCount, remaining, hasIcc } = await removeTagsFile(
           buf,
           st.file.name,
           keys,
-          st.tags.length,
+          // Same guard as stripFile: only trust the tag count once the
+          // authoritative read has landed, or the worker undercounts.
+          st.authoritative ? st.tags.length : undefined,
         );
         patch(st.id, {
           status: "done",
@@ -569,7 +619,10 @@ export default function ToolIsland({ locale, messages }: Props) {
           hasIcc,
           hasGps: hasGpsTag(remaining),
           verifying: false,
+          authoritative: true,
         });
+        // History only after success (see stripOne).
+        pushHistory(st, buf, "tool.removeSelected");
       } catch (e) {
         const key =
           e instanceof Error && e.message === "encrypted"
@@ -652,11 +705,14 @@ export default function ToolIsland({ locale, messages }: Props) {
     );
     downloadBlob(
       new Blob([zipped], { type: "application/zip" }),
-      "pureclear-clean.zip",
+      "pureclear-files.zip",
     );
   };
 
   const reset = () => {
+    // Cancel any batch in flight; the loop stops after the current file.
+    batchCancelRef.current = true;
+    setBatchProgress(null);
     for (const f of files) if (f.thumbUrl) URL.revokeObjectURL(f.thumbUrl);
     setFiles([]);
     setEditingId(null);
@@ -970,9 +1026,12 @@ function FileRow({
   onRemoveSelected: (tags: Tag[]) => Promise<void>;
   onDownload: () => void;
 }) {
-  // Per-tag selection for selective removal, keyed by raw group+name.
+  // Per-tag selection for selective removal, keyed by the stable
+  // canonical delete key — display names change when the authoritative
+  // read replaces the preview ("Model" → "Camera Model Name"), but the
+  // delete key does not, so a checked box survives the swap.
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const tagKey = (t: Tag) => `${t.group}|${t.name}`;
+  const tagKey = (t: Tag) => tagDeleteKey(t) ?? `${t.group}|${t.name}`;
   const selectedTags = f.tags.filter((t) => selected.has(tagKey(t)));
   const toggleSelect = (t: Tag) => {
     setSelected((s) => {
@@ -1103,12 +1162,8 @@ function FileRow({
               <button
                 type="button"
                 onClick={onEdit}
-                disabled={!(f.authoritative || !f.verifying)}
-                title={
-                  f.authoritative || !f.verifying
-                    ? undefined
-                    : msg("editor.waitingRead")
-                }
+                disabled={!f.authoritative}
+                title={f.authoritative ? undefined : msg("editor.waitingRead")}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
               >
                 <PencilSimple size={16} aria-hidden="true" />

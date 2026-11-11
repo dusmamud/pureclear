@@ -71,6 +71,11 @@ export function saveCustomPreset(name: string, tags: ExifTags): CustomPreset {
     createdAt: Date.now(),
   };
   const all = loadCustomPresets();
+  // Same name = same preset: replace the existing entry instead of
+  // stacking up duplicates (re-saving from the editor, or re-importing
+  // an exported pack, must not duplicate every preset).
+  const existing = all.findIndex((p) => p.name === preset.name);
+  if (existing !== -1) all.splice(existing, 1);
   all.push(preset);
   store.set(KEY, JSON.stringify(all));
   return preset;
