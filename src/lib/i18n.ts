@@ -22,12 +22,6 @@ export function localePath(locale: Locale, path: string): string {
   return locale === DEFAULT_LOCALE ? clean : `/${locale}${clean}`;
 }
 
-/** Extract locale from the current URL pathname. */
-export function localeFromPath(pathname: string): Locale {
-  const seg = pathname.split("/").filter(Boolean)[0];
-  return seg && isLocale(seg) ? seg : DEFAULT_LOCALE;
-}
-
 /** Max file size before we warn the user (100 MB). */
 export const MAX_FILE_SIZE_WARN = 100 * 1024 * 1024;
 

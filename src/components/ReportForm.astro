@@ -13,6 +13,7 @@ const { tr } = Astro.props;
   id="report"
   data-report-form
   data-api-base={REPORT_API_BASE}
+  data-not-specified={tr('report.notSpecified')}
   data-not-configured={tr('report.notConfigured')}
   data-sending={tr('report.sending')}
   data-success={tr('report.success')}
@@ -54,6 +55,7 @@ const { tr } = Astro.props;
   <form data-form class="mt-6">
     <label for="report-message" class="block text-[14px] font-medium">
       {tr('report.messageLabel')}
+      {' '}
       <span class="font-normal text-ink-2">({tr('report.optional')})</span>
     </label>
     <textarea
@@ -78,13 +80,19 @@ const { tr } = Astro.props;
   </form>
 </div>
 
-<script is:inline define:vars={{ apiBase: REPORT_API_BASE }}>
+<script>
+  import { APP_VERSION, browserFamily, osFamily, pagePath } from '../lib/report';
+
   (() => {
-    const root = document.querySelector('[data-report-form]');
+    const root = document.querySelector<HTMLElement>('[data-report-form]');
     if (!root) return;
+    const apiBase = root.dataset.apiBase;
     const params = new URLSearchParams(location.search);
 
-    const sizeBucket = (bytes) => {
+    // Kept local (not lib/report's sizeBucket): a missing/invalid size
+    // must display and send '—', while the lib helper returns '>100MB'
+    // for NaN. Payload values stay identical to before.
+    const sizeBucket = (bytes: number): string => {
       const mb = bytes / (1024 * 1024);
       if (!(mb >= 0)) return '—';
       if (mb < 1) return '<1MB';
@@ -92,36 +100,28 @@ const { tr } = Astro.props;
       if (mb < 100) return '10-100MB';
       return '>100MB';
     };
-    const browserFamily = () => {
-      const ua = navigator.userAgent;
-      if (/\bEdg\b/.test(ua)) return 'Edge';
-      if (/\bFirefox\b/.test(ua)) return 'Firefox';
-      if (/\bChrome\b/.test(ua)) return 'Chrome';
-      if (/\bSafari\b/.test(ua)) return 'Safari';
-      return 'Other';
-    };
-    const osFamily = () => {
-      const ua = navigator.userAgent;
-      if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
-      if (/Android/.test(ua)) return 'Android';
-      if (/Mac/.test(ua)) return 'macOS';
-      if (/Win/.test(ua)) return 'Windows';
-      if (/Linux/.test(ua)) return 'Linux';
-      return 'Other';
-    };
 
     const reason = (params.get('reason') || '').slice(0, 40) || 'unknown';
     const ext = (params.get('ext') || '').toLowerCase().slice(0, 10) || '—';
     const sizeBytes = parseInt(params.get('size') || '', 10);
 
-    root.querySelector('[data-field-reason]').textContent = reason;
-    root.querySelector('[data-field-ext]').textContent = ext;
-    root.querySelector('[data-field-size]').textContent = sizeBucket(sizeBytes);
+    const reasonEl = root.querySelector<HTMLElement>('[data-field-reason]');
+    if (reasonEl) {
+      reasonEl.textContent =
+        reason === 'unknown'
+          ? root.dataset.notSpecified || 'Not specified'
+          : reason;
+    }
+    const extEl = root.querySelector<HTMLElement>('[data-field-ext]');
+    if (extEl) extEl.textContent = ext;
+    const sizeEl = root.querySelector<HTMLElement>('[data-field-size]');
+    if (sizeEl) sizeEl.textContent = sizeBucket(sizeBytes);
 
-    const form = root.querySelector('[data-form]');
-    const status = root.querySelector('[data-status]');
-    const submitBtn = root.querySelector('[data-submit]');
-    const messageEl = root.querySelector('[data-message]');
+    const form = root.querySelector<HTMLFormElement>('[data-form]');
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    const submitBtn = root.querySelector<HTMLButtonElement>('[data-submit]');
+    const messageEl = root.querySelector<HTMLTextAreaElement>('[data-message]');
+    if (!form || !status || !submitBtn || !messageEl) return;
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -138,9 +138,9 @@ const { tr } = Astro.props;
         sizeBucket: sizeBucket(sizeBytes),
         browser: browserFamily(),
         os: osFamily(),
-        appVersion: '1.0.0',
+        appVersion: APP_VERSION,
         message: (messageEl.value || '').slice(0, 2000),
-        page: location.pathname.replace(/^\/(hi|as)(?=\/|$)/, '') || '/',
+        page: pagePath(),
         timestamp: new Date().toISOString(),
       };
       try {

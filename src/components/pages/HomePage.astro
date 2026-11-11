@@ -4,6 +4,7 @@ import Bento from '../Bento.astro';
 import FormatsGrid from '../FormatsGrid.astro';
 import LifestyleBand from '../LifestyleBand.astro';
 import Faq from '../Faq.astro';
+import { FORMATS } from '../../data/formats';
 import type { Locale } from '../../lib/i18n';
 import type { Translate } from '../../lib/t';
 
@@ -13,6 +14,13 @@ interface Props {
 }
 
 const { locale, tr } = Astro.props;
+
+// OpenSearch ?q= targets: match a format by slug, name or extension.
+const formatKeys = FORMATS.map((f) => ({
+  slug: f.slug,
+  keys: [f.slug, f.name.toLowerCase(), ...f.extensions],
+}));
+const localePrefix = locale === 'en' ? '' : `/${locale}`;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -65,3 +73,20 @@ const jsonLd = {
 <LifestyleBand tr={tr} />
 <Faq tr={tr} />
 <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+<script is:inline define:vars={{ formatKeys, localePrefix }}>
+  // OpenSearch ?q= handling: a matching format name/slug/extension goes
+  // to that format page (locale-correct); anything else scrolls to the tool.
+  (() => {
+    const q = new URLSearchParams(location.search).get('q');
+    if (q === null) return;
+    const needle = q.trim().toLowerCase();
+    const hit = needle
+      ? formatKeys.find((f) => f.keys.includes(needle))
+      : undefined;
+    if (hit) {
+      location.replace(`${localePrefix}/formats/${hit.slug}`);
+      return;
+    }
+    document.getElementById('tool')?.scrollIntoView();
+  })();
+</script>

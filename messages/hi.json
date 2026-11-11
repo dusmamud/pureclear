@@ -1,6 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "about.body": "PureClear ek hi wajah se hai: aapki files se aapki zindagi leak nahi honi chahiye. Har photo me chhupa data hota hai — kahan li gayi, kis device se, kab. Hum use hatate hain, aapke device par, aapki files dekhe bina.",
   "about.title": "Aapki files aapki life leak nahi karni chahiye.",
   "faq.a1": "Haan — hamesha free, na account, na watermark.",
   "faq.a2": "Nahi. Sab kuch aapke browser me, aapke device par hota hai.",
@@ -13,7 +12,6 @@
   "faq.title": "Aksar puche jaane wale sawaal",
   "footer.rights": "© 2026 PureClear. Hamesha free.",
   "footer.tagline": "Aapki files se aapki zindagi leak nahi honi chahiye.",
-  "formats.description": "{format} files se EXIF aur chhupa metadata online hatayein — free, lossless, private.",
   "formats.gridEyebrow": "Formats",
   "formats.gridTitle": "Ek tool. Har format.",
   "formats.gridSub": "Wahi private engine sab handle karta hai — apna format chuno aur shuru karo.",
@@ -24,8 +22,6 @@
   "formats.indexDescription": "JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV aur PDF se EXIF aur chhupa metadata hatayein — free, lossless, 100% browser me.",
   "formats.title": "{format} files se metadata hatayein",
   "hero.badge": "100% browser me · Koi upload nahi",
-  "hero.ctaPrimary": "Abhi files saaf karein",
-  "hero.ctaSecondary": "Kaise kaam karta hai",
   "hero.subtitle": "Photos me EXIF, GPS location aur device info chhupa hota hai. PureClear use sab hatata hai — lossless, aapke device par, hamesha free.",
   "hero.title": "Apni files se chhupa metadata hatayein.",
   "how.step1Body": "Files aapka device kabhi nahi chhodti. Sab kuch aapke browser me chalta hai.",
@@ -345,5 +341,11 @@
   "how.faq2a": "Clean ki hui file seedha aapke device par download hoti hai. Kuch upload ya store nahi hota — aapki files aapka browser kabhi nahi chhodti.",
   "how.faq3q": "Kya main ek saath kai files clean kar sakta hoon?",
   "how.faq3a": "Haan. Jitni chaaho files drop karo aur sabko ek saath clean karo — ya ek-ek karke clean, edit aur swap karo.",
-  "how.formatsTitle": "Har format par kaam karta hai"
+  "how.formatsTitle": "Har format par kaam karta hai",
+  "compare.diffCountOne": "1 antar",
+  "editor.dateHint": "Format: YYYY:MM:DD HH:MM:SS",
+  "nav.primary": "Mukhya",
+  "nav.skipToContent": "Content par jayein",
+  "report.notSpecified": "Nahi bataya gaya",
+  "swap.countOne": "1 preset"
 }

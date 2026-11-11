@@ -78,33 +78,19 @@ const categories = [
   </form>
 </div>
 
-<script is:inline define:vars={{ apiBase: REPORT_API_BASE }}>
+<script>
+  import { APP_VERSION, browserFamily, osFamily, pagePath } from '../lib/report';
+
   (() => {
-    const root = document.querySelector('[data-feedback-form]');
+    const root = document.querySelector<HTMLElement>('[data-feedback-form]');
     if (!root) return;
+    const apiBase = root.dataset.apiBase;
 
-    const browserFamily = () => {
-      const ua = navigator.userAgent;
-      if (/\bEdg\b/.test(ua)) return 'Edge';
-      if (/\bFirefox\b/.test(ua)) return 'Firefox';
-      if (/\bChrome\b/.test(ua)) return 'Chrome';
-      if (/\bSafari\b/.test(ua)) return 'Safari';
-      return 'Other';
-    };
-    const osFamily = () => {
-      const ua = navigator.userAgent;
-      if (/iPhone|iPad|iPod/.test(ua)) return 'iOS';
-      if (/Android/.test(ua)) return 'Android';
-      if (/Mac/.test(ua)) return 'macOS';
-      if (/Win/.test(ua)) return 'Windows';
-      if (/Linux/.test(ua)) return 'Linux';
-      return 'Other';
-    };
-
-    const form = root.querySelector('[data-form]');
-    const status = root.querySelector('[data-status]');
-    const submitBtn = root.querySelector('[data-submit]');
-    const messageEl = root.querySelector('[data-message]');
+    const form = root.querySelector<HTMLFormElement>('[data-form]');
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    const submitBtn = root.querySelector<HTMLButtonElement>('[data-submit]');
+    const messageEl = root.querySelector<HTMLTextAreaElement>('[data-message]');
+    if (!form || !status || !submitBtn || !messageEl) return;
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -112,7 +98,9 @@ const categories = [
         status.textContent = root.dataset.notConfigured || 'Feedback is not available yet.';
         return;
       }
-      const category = form.querySelector('input[name="category"]:checked')?.value || 'other';
+      const category =
+        form.querySelector<HTMLInputElement>('input[name="category"]:checked')?.value ||
+        'other';
       submitBtn.disabled = true;
       status.textContent = root.dataset.sending || 'Sending…';
       const payload = {
@@ -120,9 +108,9 @@ const categories = [
         category,
         browser: browserFamily(),
         os: osFamily(),
-        appVersion: '1.0.0',
+        appVersion: APP_VERSION,
         message: (messageEl.value || '').slice(0, 2000),
-        page: location.pathname.replace(/^\/(hi|as)(?=\/|$)/, '') || '/',
+        page: pagePath(),
         timestamp: new Date().toISOString(),
       };
       try {

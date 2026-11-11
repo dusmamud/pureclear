@@ -15,7 +15,7 @@ import {
   type CustomPreset,
 } from "../../lib/custom-presets";
 import { downloadBlob } from "../../lib/zip";
-import type { MsgFn } from "./ToolIsland";
+import { countMsg, type MsgFn } from "./ToolIsland";
 
 interface PresetPickerProps {
   msg: MsgFn;
@@ -206,7 +206,11 @@ export default function PresetPicker({
             {msg("swap.noCustom")}
           </p>
         ) : (
-          <ul className="mt-1">
+          <ul
+            className="mt-1"
+            role="listbox"
+            aria-label={msg("swap.customTitle")}
+          >
             {filteredCustom.map((cp) => {
               const p = customPresetToCamera(cp);
               const active = selectedId === p.id;
@@ -260,7 +264,7 @@ export default function PresetPicker({
       </div>
 
       <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-        {msg("swap.count", { count: filtered.length })}
+        {countMsg(msg, "swap.count", "swap.countOne", filtered.length)}
       </p>
       <ul
         className="mt-1 max-h-64 overflow-y-auto pr-1"

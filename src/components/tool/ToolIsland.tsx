@@ -42,6 +42,7 @@ import {
   getExtension,
   isSupported,
   MAX_FILE_SIZE_WARN,
+  SUPPORTED_EXTENSIONS,
   localePath,
   type Locale,
 } from "../../lib/i18n";
@@ -125,7 +126,7 @@ function makeMsg(messages: Record<string, string>): MsgFn {
 }
 
 /** Singular/plural: "1 tag removed" vs "{count} tags removed". */
-function countMsg(
+export function countMsg(
   msg: MsgFn,
   pluralKey: string,
   singularKey: string,
@@ -749,17 +750,12 @@ export default function ToolIsland({ locale, messages }: Props) {
 
   return (
     <div className="contents">
-      {/* Mode tabs: Clean removes metadata, Edit lets the user change it, Swap replaces it with a device preset. */}
+      {/* Mode toggle buttons: Clean removes metadata, Edit lets the user change it, Swap replaces it with a device preset. */}
       <div className="mb-4 flex justify-center">
-        <div
-          role="tablist"
-          aria-label={msg("tool.modeLabel")}
-          className="inline-flex rounded-pill border border-hairline bg-card p-1 shadow-card"
-        >
+        <div className="inline-flex rounded-pill border border-hairline bg-card p-1 shadow-card">
           <button
             type="button"
-            role="tab"
-            aria-selected={mode === "clean"}
+            aria-pressed={mode === "clean"}
             onClick={() => {
               setMode("clean");
               setEditingId(null);
@@ -776,8 +772,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={mode === "edit"}
+            aria-pressed={mode === "edit"}
             onClick={() => {
               setMode("edit");
               setEditingId(null);
@@ -794,8 +789,7 @@ export default function ToolIsland({ locale, messages }: Props) {
           </button>
           <button
             type="button"
-            role="tab"
-            aria-selected={mode === "swap"}
+            aria-pressed={mode === "swap"}
             onClick={() => {
               setMode("swap");
               setEditingId(null);
@@ -821,7 +815,11 @@ export default function ToolIsland({ locale, messages }: Props) {
           aria-label={msg("tool.dropTitle")}
           onClick={() => inputRef.current?.click()}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") inputRef.current?.click();
+            if (e.key === "Enter" || e.key === " ") {
+              // Space would also scroll the page — stop that.
+              if (e.key === " ") e.preventDefault();
+              inputRef.current?.click();
+            }
           }}
           onDragOver={(e) => {
             e.preventDefault();
@@ -855,6 +853,8 @@ export default function ToolIsland({ locale, messages }: Props) {
             ref={inputRef}
             type="file"
             multiple
+            tabIndex={-1}
+            accept={SUPPORTED_EXTENSIONS.map((ext) => `.${ext}`).join(",")}
             className="sr-only"
             onChange={(e) => {
               if (e.target.files?.length) addFiles(e.target.files);

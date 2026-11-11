@@ -1682,11 +1682,6 @@ export const PRESET_CATEGORIES: {
   { id: "action", labelKey: "swap.category.action" },
 ];
 
-/** Brands in first-seen order, for the picker UI. */
-export const PRESET_BRANDS: string[] = Array.from(
-  new Set(CAMERA_PRESETS.map((p) => p.brand)),
-);
-
 export function findPreset(id: string): CameraPreset | undefined {
   return CAMERA_PRESETS.find((p) => p.id === id);
 }

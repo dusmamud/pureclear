@@ -1,6 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "about.body": "PureClear exists for one reason: your files should not leak your life. Every photo carries hidden data — where it was taken, with what device, when. We remove it, on your device, without ever seeing your files.",
   "about.title": "Your files shouldn't leak your life.",
   "faq.a1": "Yes — free forever, no accounts, no watermarks.",
   "faq.a2": "No. Everything happens in your browser on your device.",
@@ -13,7 +12,6 @@
   "faq.title": "Frequently asked questions",
   "footer.rights": "© 2026 PureClear. Free forever.",
   "footer.tagline": "Your files should not leak your life.",
-  "formats.description": "Strip EXIF and hidden metadata from {format} files online — free, lossless, private.",
   "formats.gridEyebrow": "Formats",
   "formats.gridTitle": "One tool. Every format.",
   "formats.gridSub": "The same private engine handles them all — pick your format to start.",
@@ -24,8 +22,6 @@
   "formats.indexDescription": "Strip EXIF and hidden metadata from JPG, PNG, WebP, HEIC, AVIF, GIF, MP4, MOV and PDF — free, lossless, 100% in-browser.",
   "formats.title": "Remove metadata from {format} files",
   "hero.badge": "100% in-browser · No uploads",
-  "hero.ctaPrimary": "Clean files now",
-  "hero.ctaSecondary": "How it works",
   "hero.subtitle": "Photos carry EXIF, GPS location and device info. PureClear removes it all — losslessly, on your device, free forever.",
   "hero.title": "Strip hidden metadata from your files.",
   "how.step1Body": "Files never leave your device. Everything runs in your browser.",
@@ -345,5 +341,11 @@
   "how.faq2a": "The cleaned file downloads straight to your device. Nothing is uploaded or stored anywhere — your files never leave your browser.",
   "how.faq3q": "Can I clean several files at once?",
   "how.faq3a": "Yes. Drop in as many files as you like and clean them all together — or clean, edit and swap metadata file by file.",
-  "how.formatsTitle": "Works on every format"
+  "how.formatsTitle": "Works on every format",
+  "compare.diffCountOne": "1 difference",
+  "editor.dateHint": "Format: YYYY:MM:DD HH:MM:SS",
+  "nav.primary": "Primary",
+  "nav.skipToContent": "Skip to content",
+  "report.notSpecified": "Not specified",
+  "swap.countOne": "1 preset"
 }

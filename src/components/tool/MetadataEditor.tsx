@@ -123,7 +123,13 @@ export default function MetadataEditor({
   };
 
   return (
-    <div className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4">
+    <form
+      className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save();
+      }}
+    >
       <div className="flex items-start justify-between gap-3 px-1">
         <div>
           <p className="text-[13px] font-semibold text-ink">
@@ -160,6 +166,14 @@ export default function MetadataEditor({
                 const inputCls = `w-full rounded-xl border bg-card px-3 py-2 text-sm text-ink outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-ink-2/60 focus:border-accent focus:ring-2 focus:ring-accent/20 ${
                   err ? "border-red-500/60" : "border-hairline"
                 }`;
+                // Date fields keep their text input (ExifTool's
+                // YYYY:MM:DD HH:MM:SS), but the format is now stated
+                // visibly and linked to the input for screen readers.
+                const hintId =
+                  field.type === "date" ? `${field.id}-hint` : undefined;
+                const errorId = err ? `${field.id}-error` : undefined;
+                const describedBy =
+                  [hintId, errorId].filter(Boolean).join(" ") || undefined;
                 return (
                   <label key={field.id} className="block">
                     <span className="mb-1 block text-xs font-medium text-ink">
@@ -171,6 +185,8 @@ export default function MetadataEditor({
                         onChange={(e) => set(field.id, e.target.value)}
                         rows={2}
                         placeholder={field.placeholder}
+                        aria-invalid={err ? true : undefined}
+                        aria-describedby={describedBy}
                         className={`${inputCls} resize-none`}
                       />
                     ) : (
@@ -182,11 +198,24 @@ export default function MetadataEditor({
                         value={values[field.id]}
                         onChange={(e) => set(field.id, e.target.value)}
                         placeholder={field.placeholder}
+                        aria-invalid={err ? true : undefined}
+                        aria-describedby={describedBy}
                         className={inputCls}
                       />
                     )}
+                    {field.type === "date" && (
+                      <span
+                        id={hintId}
+                        className="mt-1 block text-xs text-ink-2"
+                      >
+                        {msg("editor.dateHint")}
+                      </span>
+                    )}
                     {err && (
-                      <span className="mt-1 block text-xs text-red-600 dark:text-red-400">
+                      <span
+                        id={errorId}
+                        className="mt-1 block text-xs text-red-600 dark:text-red-400"
+                      >
                         {msg(err)}
                       </span>
                     )}
@@ -212,6 +241,14 @@ export default function MetadataEditor({
             type="text"
             value={presetName}
             onChange={(e) => setPresetName(e.target.value)}
+            onKeyDown={(e) => {
+              // Enter here confirms the preset name — it must not
+              // submit the editor form instead.
+              if (e.key === "Enter") {
+                e.preventDefault();
+                confirmSavePreset();
+              }
+            }}
             placeholder={msg("editor.presetName")}
             aria-label={msg("editor.presetName")}
             autoFocus
@@ -275,8 +312,7 @@ export default function MetadataEditor({
             {msg("editor.cancel")}
           </button>
           <button
-            type="button"
-            onClick={save}
+            type="submit"
             disabled={!canSave}
             className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-white transition-[color,background-color,transform] duration-200 ease-apple hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -285,6 +321,6 @@ export default function MetadataEditor({
           </button>
         </div>
       )}
-    </div>
+    </form>
   );
 }

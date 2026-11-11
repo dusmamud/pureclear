@@ -165,8 +165,13 @@ const isPill = variant === 'pill';
 
     const navigate = (value) => {
       if (value === currentLocale) return;
+      // No localized 404 pages exist — stay on /404 in any locale.
+      if (path === '/404') {
+        location.href = '/404';
+        return;
+      }
       const url = value === 'en' ? path : `/${value}${path === '/' ? '' : path}`;
-      location.href = url || '/';
+      location.href = (url || '/') + location.search;
     };
 
     button.addEventListener('click', () => setOpen(!open));

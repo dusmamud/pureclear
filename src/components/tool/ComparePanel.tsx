@@ -1,7 +1,7 @@
 import { X } from "@phosphor-icons/react";
 import type { Tag } from "../../lib/engine";
 import { compareTags } from "../../lib/tag-viewer";
-import type { MsgFn } from "./ToolIsland";
+import { countMsg, type MsgFn } from "./ToolIsland";
 
 interface ComparePanelProps {
   aName: string;
@@ -33,7 +33,12 @@ export default function ComparePanel({
           {msg("compare.title")}
         </h2>
         <span className="text-xs text-ink-2">
-          {msg("compare.diffCount", { count: diffCount })}
+          {countMsg(
+            msg,
+            "compare.diffCount",
+            "compare.diffCountOne",
+            diffCount,
+          )}
         </span>
         <span className="ms-auto inline-flex flex-wrap items-center gap-1.5 text-[11px]">
           <span className="rounded-full bg-amber-500/15 px-2 py-0.5 font-medium text-amber-700 dark:text-amber-300">
