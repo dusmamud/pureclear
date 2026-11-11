@@ -124,6 +124,16 @@ function makeMsg(messages: Record<string, string>): MsgFn {
   };
 }
 
+/** Singular/plural: "1 tag removed" vs "{count} tags removed". */
+function countMsg(
+  msg: MsgFn,
+  pluralKey: string,
+  singularKey: string,
+  count: number,
+): string {
+  return count === 1 ? msg(singularKey, { count }) : msg(pluralKey, { count });
+}
+
 function hasGpsTag(tags: Tag[]): boolean {
   return tags.some(
     (t) =>
@@ -1107,11 +1117,32 @@ function FileRow({
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-green-700 dark:text-green-400">
               <CheckCircle size={16} weight="fill" aria-hidden="true" />
               {f.action === "edit"
-                ? msg("tool.tagsEdited", { count: f.editedCount })
+                ? countMsg(
+                    msg,
+                    "tool.tagsEdited",
+                    "tool.tagsEditedOne",
+                    f.editedCount,
+                  )
                 : f.action === "swap"
-                  ? msg("tool.tagsSwapped", { count: f.swappedCount })
-                  : msg("tool.tagsRemoved", { count: f.removedCount })}{" "}
-              · {msg("tool.tagsRemaining", { count: f.remaining.length })}
+                  ? countMsg(
+                      msg,
+                      "tool.tagsSwapped",
+                      "tool.tagsSwappedOne",
+                      f.swappedCount,
+                    )
+                  : countMsg(
+                      msg,
+                      "tool.tagsRemoved",
+                      "tool.tagsRemovedOne",
+                      f.removedCount,
+                    )}{" "}
+              ·{" "}
+              {countMsg(
+                msg,
+                "tool.tagsRemaining",
+                "tool.tagsRemainingOne",
+                f.remaining.length,
+              )}
             </p>
           )}
 

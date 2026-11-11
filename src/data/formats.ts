@@ -320,7 +320,7 @@ export const FORMATS: FormatInfo[] = [
     },
     seoTitle: {
       en: "Remove EXIF Metadata from HEIC — Free & Private",
-      hi: "HEIC se EXIF Metadata Hatayein — Free aur Private",
+      hi: "HEIC se EXIF Metadata Hatayein — Free",
       as: "HEIC ৰ পৰা EXIF মেটাডাটা আঁতৰাওক — বিনামূলীয়া",
     },
     seoDescription: {

@@ -181,7 +181,9 @@ export default function TagInspector({
     <div className="mt-4 rounded-2xl border border-hairline bg-canvas/60 p-3 sm:p-4">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-1">
         <p className="text-[13px] font-semibold text-ink">
-          {msg("tool.tagsFound", { count: tags.length })}
+          {tags.length === 1
+            ? msg("tool.tagsFoundOne", { count: tags.length })
+            : msg("tool.tagsFound", { count: tags.length })}
         </p>
         {verifying && (
           <span className="inline-flex items-center gap-1.5 text-xs text-ink-2">
