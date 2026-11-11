@@ -1065,8 +1065,11 @@ function FileRow({
     f.file.size;
   return (
     <li className="px-4 py-5 sm:px-6">
-      {/* Header row: thumbnail + file info + actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      {/* Header row: thumbnail + file info + actions.
+          The row wraps: when the actions (Compare + Remove + Download +
+          Undo, ~570px) don't fit beside the file info, they drop to their
+          own line instead of crushing the name/status column to a sliver. */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
         {f.thumbUrl ? (
           <img
             src={f.thumbUrl}
@@ -1079,7 +1082,7 @@ function FileRow({
           </span>
         )}
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[220px] flex-1">
           <p className="truncate text-sm font-medium">{f.file.name}</p>
           <p className="mt-0.5 text-xs text-ink-2">
             {formatSize(f.file.size)}
