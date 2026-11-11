@@ -11,9 +11,13 @@ interface Props {
   description: string;
   path: string; // locale-agnostic path, e.g. "/about"
   ogImage?: string;
+  /** Suppress hreflang alternate links (e.g. 404: localized variants don't exist). */
+  noAlternateLocales?: boolean;
+  /** Emit a minimal WebPage-type JSON-LD block (name = title, url = canonical). */
+  jsonLdType?: 'AboutPage' | 'ContactPage' | 'WebPage';
 }
 
-const { locale, title, description, path, ogImage = '/og/default.png' } = Astro.props;
+const { locale, title, description, path, ogImage = '/og/default.png', noAlternateLocales = false, jsonLdType } = Astro.props;
 const tr = t(locale);
 const dir = LOCALE_META[locale].dir;
 const canonical = `https://pureclear.dusrel.com${localePath(locale, path)}`;
@@ -30,10 +34,30 @@ const ogAlternates = Object.values(OG_LOCALES).filter((l) => l !== ogLocale);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="en" href={`https://pureclear.dusrel.com${path}`} />
-    <link rel="alternate" hreflang="hi" href={`https://pureclear.dusrel.com/hi${path}`} />
-    <link rel="alternate" hreflang="as" href={`https://pureclear.dusrel.com/as${path}`} />
-    <link rel="alternate" hreflang="x-default" href={`https://pureclear.dusrel.com${path}`} />
+    {!noAlternateLocales && (
+      <link rel="alternate" hreflang="en" href={`https://pureclear.dusrel.com${path}`} />
+    )}
+    {!noAlternateLocales && (
+      <link rel="alternate" hreflang="hi" href={`https://pureclear.dusrel.com/hi${path}`} />
+    )}
+    {!noAlternateLocales && (
+      <link rel="alternate" hreflang="as" href={`https://pureclear.dusrel.com/as${path}`} />
+    )}
+    {!noAlternateLocales && (
+      <link rel="alternate" hreflang="x-default" href={`https://pureclear.dusrel.com${path}`} />
+    )}
+    {jsonLdType && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': jsonLdType,
+          name: title,
+          url: canonical,
+        })}
+        is:inline
+      />
+    )}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="PureClear" />

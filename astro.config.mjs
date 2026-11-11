@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   site: "https://pureclear.dusrel.com",
   output: "static",
+  trailingSlash: "never",
   i18n: {
     locales: ["en", "hi", "as"],
     defaultLocale: "en",
@@ -21,6 +22,9 @@ export default defineConfig({
           hi: "hi",
           as: "as",
         },
+      },
+      serialize(item) {
+        return { ...item, lastmod: new Date().toISOString().slice(0, 10) };
       },
     }),
   ],
