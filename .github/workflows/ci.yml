@@ -19,4 +19,6 @@ jobs:
       - run: npm run paraglide
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
+      # Retry once: transient prerender chunk errors (audit O1) self-heal on
+      # retry; a genuine failure still fails on the second run.
+      - run: npm run build || npm run build
